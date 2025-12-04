@@ -14,8 +14,12 @@ import java.sql.*;
 import br.com.megacenter.dal.ModuloConexao;
 import br.com.megacenter.utils.MaskFormatterUtil;
 import com.toedter.calendar.JDateChooser;
+import java.awt.Image;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -140,9 +144,30 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
                 + "usuario, senha, nome, email, telefone, endereco, complemento, numero, cep, uf, perfil, bairro, cpf, matricula, "
                 + "data_de_nascimento, filial, cargo, area_de_atuacao, motivo, cidade, celular, nacionalidade, estado_civil, profissao, "
                 + "rg, orgao_emissor, ctps, pis, banco, agencia, dv_agencia, conta_corrente, dv_conta, tipo_de_chave_pix, chave_pix, "
-                + "tipo_funcao, situacao, data_admissao, data_demissao"
-                + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                + "tipo_funcao, situacao, data_admissao, data_demissao, foto_usuario"
+                + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+        
+        // Validação de campos obrigatórios
+        if (txtFilialUsu.getText().trim().isEmpty()
+                || txtNomeUsu.getText().trim().isEmpty()
+                || txtUsuarioUsu.getText().trim().isEmpty()
+                || txtSenhaUsu.getText().trim().isEmpty()
+                || txtCargoUsu.getText().trim().isEmpty()
+                || cboUsoPerfil.getSelectedItem() == null
+                || txtDtadmissaoUsu.getDate() == null) {
+
+            JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios.");
+            return;
+        }
+
+        // Validação da imagem
+        File imagem = new File(txtDiretorioImagemUsuario.getText());
+        if (!imagem.exists() || !imagem.isFile()) {
+            JOptionPane.showMessageDialog(null, "Imagem não encontrada ou caminho inválido.");
+            return;
+        }
+        
         try {
             pst = conexao.prepareStatement(sql);
 
@@ -200,6 +225,8 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
             // DEMISSÃO
             java.util.Date dem = txtDtdemissaoUsu.getDate();
             pst.setDate(39, dem != null ? new java.sql.Date(dem.getTime()) : null);
+            
+            
 
             // EXECUTA DEPOIS DE SETAR TUDO
             int cadastrou = pst.executeUpdate();
@@ -223,7 +250,7 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
                 + "data_de_nascimento=?, filial=?, cargo=?, area_de_atuacao=?, motivo=?, cidade=?, celular=?, "
                 + "nacionalidade=?, estado_civil=?, profissao=?, rg=?, orgao_emissor=?, ctps=?, pis=?, banco=?, "
                 + "agencia=?, dv_agencia=?, conta_corrente=?, dv_conta=?, tipo_de_chave_pix=?, chave_pix=?, "
-                + "tipo_funcao=?, situacao=?, data_admissao=?, data_demissao=? "
+                + "tipo_funcao=?, situacao=?, data_admissao=?, data_demissao=?, foto_usuario=?, "
                 + "WHERE idusuario=?";
 
         try {
@@ -364,6 +391,7 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         cboTipoPixUsul.setSelectedItem(null);
         txtChavepixUsu.setText(null);
         cboUsoPerfil.setSelectedItem(null);
+        txtDiretorioImagemUsuario.setText(null);
 
         // limpa radio buttons
         rbtAtivoUsu.setSelected(false);
@@ -629,8 +657,8 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         txtNomeUsu.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(txtNomeUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(267, 25, 274, -1));
 
-        jLabel2.setText("Nome");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(271, 5, -1, -1));
+        jLabel2.setText("Nome *");
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(271, 5, 70, -1));
 
         txtIdUsu.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(txtIdUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 25, 55, -1));
@@ -638,19 +666,19 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         jLabel14.setText("Código");
         jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 5, -1, -1));
 
-        jLabel3.setText("Senha:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(551, 51, -1, -1));
+        jLabel3.setText("Senha: *");
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(551, 51, 70, -1));
 
         txtSenhaUsu.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(txtSenhaUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(551, 71, 132, -1));
 
-        jLabel4.setText("Usuário (login)");
+        jLabel4.setText("Usuário (login) *");
         jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(551, 5, 91, -1));
 
         txtUsuarioUsu.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(txtUsuarioUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(551, 25, 132, -1));
 
-        cboUsoPerfil.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "admin", "colaborador" }));
+        cboUsoPerfil.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "admin", "Técnico", "Usuário", "colaborador", " " }));
         jPanel1.add(cboUsoPerfil, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 120, 130, -1));
 
         jLabel1.setText("Matricula:");
@@ -664,8 +692,8 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         });
         jPanel1.add(txtMatriculaUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 25, 118, -1));
 
-        jLabel12.setText("Perfil");
-        jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 100, -1, -1));
+        jLabel12.setText("Perfil *");
+        jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 100, 60, -1));
 
         lblFotoUsuario.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(lblFotoUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(693, 25, 142, 137));
@@ -682,7 +710,7 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         });
         jPanel1.add(txtFilialUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(76, 25, 57, -1));
 
-        jLabel16.setText("Filial");
+        jLabel16.setText("Filial *");
         jPanel1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(76, 5, 57, -1));
 
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
@@ -1098,7 +1126,7 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
         jPanel1.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 97, -1, -1));
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Tipo / Função"));
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Tipo / Função *"));
 
         rbtTipoFuncionarioUsu.setBackground(new java.awt.Color(255, 255, 255));
         rbtTipoFuncionarioUsu.setText("Funcionário");
@@ -1134,16 +1162,16 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
 
         jPanel1.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(141, 97, -1, -1));
 
-        jLabel37.setText("Dt. Admissão");
-        jPanel1.add(jLabel37, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 51, -1, -1));
+        jLabel37.setText("Dt. Admissão *");
+        jPanel1.add(jLabel37, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 51, 100, -1));
         jPanel1.add(txtDtadmissaoUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(11, 71, 120, -1));
         jPanel1.add(txtDtdemissaoUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(141, 71, 120, -1));
 
         jLabel38.setText("Dt. Demissão");
         jPanel1.add(jLabel38, new org.netbeans.lib.awtextra.AbsoluteConstraints(141, 51, -1, -1));
 
-        jLabel39.setText("Cargo");
-        jPanel1.add(jLabel39, new org.netbeans.lib.awtextra.AbsoluteConstraints(271, 51, -1, -1));
+        jLabel39.setText("Cargo *");
+        jPanel1.add(jLabel39, new org.netbeans.lib.awtextra.AbsoluteConstraints(271, 51, 70, -1));
 
         txtCargoUsu.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel1.add(txtCargoUsu, new org.netbeans.lib.awtextra.AbsoluteConstraints(271, 71, 130, -1));
@@ -1211,6 +1239,11 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
 
         btnInserirImagemUsuario.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/imagem.png"))); // NOI18N
         btnInserirImagemUsuario.setText("Imagem");
+        btnInserirImagemUsuario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInserirImagemUsuarioActionPerformed(evt);
+            }
+        });
 
         btnSalvarUsu.setText("Salvar");
         btnSalvarUsu.addActionListener(new java.awt.event.ActionListener() {
@@ -1299,6 +1332,22 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
     private void txtNumeroUsuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumeroUsuActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNumeroUsuActionPerformed
+
+    private void btnInserirImagemUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInserirImagemUsuarioActionPerformed
+        // Criando o metodo para adicionar imagem
+        JFileChooser arquivoimagem = new JFileChooser();
+        arquivoimagem.setDialogTitle("Selecione uma Imagem");
+        arquivoimagem.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int op = arquivoimagem.showOpenDialog(this);
+        if (op == JFileChooser.APPROVE_OPTION) {
+            File file = new File("");
+            file = arquivoimagem.getSelectedFile();
+            String fileCodigo = file.getAbsolutePath();
+            txtDiretorioImagemUsuario.setText(fileCodigo);
+            ImageIcon imagem = new ImageIcon(file.getPath());
+            lblFotoUsuario.setIcon(new ImageIcon(imagem.getImage().getScaledInstance(lblFotoUsuario.getWidth(), lblFotoUsuario.getHeight(), Image.SCALE_DEFAULT)));
+        }
+    }//GEN-LAST:event_btnInserirImagemUsuarioActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

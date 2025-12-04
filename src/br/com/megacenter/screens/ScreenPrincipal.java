@@ -7,6 +7,12 @@ package br.com.megacenter.screens;
 
 import javax.swing.GroupLayout;
 import br.com.megacenter.dal.ModuloConexao;
+import br.com.megacenter.screens.ScreenChamados;
+import br.com.megacenter.screens.ScreenEmpresa;
+import br.com.megacenter.screens.ScreenEquipamentos;
+import br.com.megacenter.screens.ScreenFilial;
+import br.com.megacenter.screens.ScreenSobre;
+import br.com.megacenter.screens.ScreenUsuarios;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -66,6 +72,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuCadastroOs = new javax.swing.JMenuItem();
         MenuCadastroUsuarios = new javax.swing.JMenuItem();
         menuEquipamentos = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
         MenuRelatorio = new javax.swing.JMenu();
         menuRelatorioEmpresa = new javax.swing.JMenuItem();
         MenuRelatorioChamado = new javax.swing.JMenuItem();
@@ -101,7 +108,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             .addGap(0, 684, Short.MAX_VALUE)
         );
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/logo-Mega-Center.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/logoMegaCenter.png"))); // NOI18N
         jLabel1.setToolTipText("Mega Center de Alimentos LTDA");
 
         lblData.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
@@ -133,22 +140,23 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblUsuario)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblData, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblHora)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblUsuario)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblData, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblHora))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(Desktop, javax.swing.GroupLayout.PREFERRED_SIZE, 1000, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(Desktop, javax.swing.GroupLayout.PREFERRED_SIZE, 1000, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel1)
-                .addGap(0, 18, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,7 +194,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuCadastro.setToolTipText("Cadastro");
 
         MenuCadastroEmpresas.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.ALT_MASK));
-        MenuCadastroEmpresas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/icon_empresa.png"))); // NOI18N
+        MenuCadastroEmpresas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Empresas.png"))); // NOI18N
         MenuCadastroEmpresas.setText("Empresas");
         MenuCadastroEmpresas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -225,9 +233,19 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         });
         MenuCadastro.add(menuEquipamentos);
 
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.ALT_MASK));
+        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Filial.png"))); // NOI18N
+        jMenuItem1.setText("Flial");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        MenuCadastro.add(jMenuItem1);
+
         Menu.add(MenuCadastro);
 
-        MenuRelatorio.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/icon_relatorio.png"))); // NOI18N
+        MenuRelatorio.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Relatorios.png"))); // NOI18N
         MenuRelatorio.setToolTipText("Relatório");
         MenuRelatorio.setEnabled(false);
 
@@ -241,7 +259,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuRelatorio.add(menuRelatorioEmpresa);
 
         MenuRelatorioChamado.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
-        MenuRelatorioChamado.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/icon_serviços.png"))); // NOI18N
+        MenuRelatorioChamado.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Relatorio-Chamados.png"))); // NOI18N
         MenuRelatorioChamado.setText("Chamados");
         MenuRelatorioChamado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -386,6 +404,13 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         Desktop.add(equipamentos);
     }//GEN-LAST:event_menuEquipamentosActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // Chamando a tela de cadastro de Filial
+        ScreenFilial filial = new ScreenFilial();
+        filial.setVisible(true);
+        Desktop.add(filial);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -438,6 +463,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblData;
     private javax.swing.JLabel lblHora;
