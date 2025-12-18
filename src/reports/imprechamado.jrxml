@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="imprechamado" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d71788e8-9c7e-4616-92ed-fdba023098fc">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="chamado" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select * from chamados where idchamado = $P{chamado}]]>
+	</queryString>
+	<field name="idchamado" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="data_chamado" class="java.sql.Timestamp">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="equipamento" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="titulo" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="descricao" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="categoria" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="grupo" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="urgencia" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="status" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="atribuido" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="idempre" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="124" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="129" height="79" uuid="d732598d-dd59-43dd-aa2e-a9beb4288ff1"/>
+				<imageExpression><![CDATA["C:\\Users\\JAnderson\\Pictures\\logo-Mega-Center.png"]]></imageExpression>
+			</image>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="414" y="0" width="141" height="20" uuid="7703e5bf-01b4-4d0c-8092-196d6ac1b1ae"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="152" y="20" width="292" height="22" uuid="7a45f12c-29ba-4b09-9701-b9394dd04198"/>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MEGA CENTER DE ALIMENTOS LTDA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="79" width="63" height="20" uuid="86f5267c-1e15-4af5-95a3-cf1bef0d3fcc"/>
+				<textFieldExpression><![CDATA[$F{idempre}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="79" width="100" height="20" uuid="1dc05981-9c81-4887-8ad8-efee4db9311c"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código da Empresa:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="63" y="99" width="100" height="20" uuid="7c652476-b38b-4292-808d-7631fbe4517e"/>
+				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="99" width="69" height="20" uuid="93a58e7b-ba0c-4450-897b-92ca0dbe3a2a"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Solicitação:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="472" y="79" width="85" height="20" uuid="ed8fb3a8-0926-4eea-bbe2-35e445d6d731"/>
+				<textFieldExpression><![CDATA[$F{atribuido}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="362" y="79" width="110" height="20" uuid="3d90a1f9-625a-4bee-ba31-a9b42d07a460"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Responsável Técnico:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="119" width="555" height="1" uuid="1ff888da-64b6-4661-8022-1744b107c0f2"/>
+			</line>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="160" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="2" width="69" height="20" uuid="3a8520cd-8654-4b2a-adef-8e94617b7d0e"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº Chamado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="457" y="2" width="98" height="20" uuid="13b9ce7a-a5cf-4f26-95b9-60843c6f7b22"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Data da Solicitação]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="163" y="2" width="78" height="20" uuid="c3372e5b-c228-48a3-86f9-f0422a476268"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Equipamento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="2" width="72" height="20" uuid="5ee91081-f23f-4c2e-ab24-eb5da87c8f21"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Titulo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="66" width="100" height="20" uuid="d450b0aa-9cf6-4508-bd4d-3a967ef14356"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descricão]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="387" y="2" width="57" height="20" uuid="476fb8db-f31a-4e9f-beaf-ae4cadf3e3ef"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Categoria]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="0" y="86" width="555" height="70" uuid="73972fea-a8b4-4bfa-8fdb-d61bc0d2c223"/>
+			</rectangle>
+			<textField>
+				<reportElement x="0" y="22" width="57" height="20" uuid="e2534a24-2b83-443c-a8f0-2a886084cf2d"/>
+				<textFieldExpression><![CDATA[$F{idchamado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="86" width="555" height="70" uuid="0e33b6a5-cb73-416a-8c0f-f2d2f2015f33"/>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="22" width="72" height="44" uuid="cefb3d68-8afd-4159-ae0e-94683c420029"/>
+				<textFieldExpression><![CDATA[$F{titulo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="163" y="22" width="78" height="20" uuid="03befc87-0d2d-4f87-88ae-a96293956f4f"/>
+				<textFieldExpression><![CDATA[$F{equipamento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="387" y="22" width="72" height="20" uuid="65e6a1d7-8fb2-4e4c-bd75-fef057471246"/>
+				<textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="22" width="72" height="20" uuid="a42573e1-2489-4fec-b8bd-c5ef110664ff"/>
+				<textFieldExpression><![CDATA[$F{data_chamado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
