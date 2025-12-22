@@ -146,6 +146,26 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
+    /**
+     * Atualiza o dashboard se ele estiver aberto na tela principal
+     */
+    private void atualizarDashboardSeAberto() {
+
+        java.awt.Window window
+                = javax.swing.SwingUtilities.getWindowAncestor(this);
+
+        if (window instanceof ScreenPrincipal) {
+
+            ScreenPrincipal principal = (ScreenPrincipal) window;
+
+            ScreenDashboard dashboard = principal.getDashboard();
+
+            if (dashboard != null && !dashboard.isClosed()) {
+                dashboard.atualizarDashboardCompleto();
+            }
+        }
+    }
+
     ///////////////////////////////////PREENCHE AS INFORMAÇÕES DA TABELA/////////////////////////////////
     // criando o metodo para pesquisar os equipamentos pelo número da etiqueta
     private void pesquisar_equipamento() {
@@ -482,6 +502,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             limpar_campos(); //chamando o metodo
             exibir_todos_equipamentos_dashboard(); //chamando o metodo
             atualizarTotalEquipamentos(); //chamando o metodo
+            atualizarDashboardSeAberto();
 
             // ===============================
             // 🔄 ATUALIZA O DASHBOARD EM TEMPO REAL
@@ -513,84 +534,79 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         String sql = "UPDATE equipamentos SET etiqueta_equipamento=?, tipo=?, marca=?, setor=?, funcionario=?, valor=?, foto_equipamento=?, "
                 + "descricao=?, condicoes_equipamento=?, status=?, id_filial=?, data_saida=?, quantidade=? WHERE idequipamento=?";
 
-        FileInputStream fis = null;
+        File imagem = new File(txtDiretorioImagemEqui.getText());
 
-        try {
-            // Validação dos campos obrigatórios
-            if (txtEtiquetaEqui.getText().isEmpty() || txtFuncionarioEqui.getText().isEmpty()
-                    || cboSetorEqui.getSelectedItem().equals(" ") || cboTipoEqui.getSelectedItem().equals(" ")) {
-                JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios.");
-                return;
-            }
+        if (!imagem.exists()) {
+            JOptionPane.showMessageDialog(null, "Imagem não encontrada.");
+            return;
+        }
 
-            // Verifica se o arquivo de imagem existe
-            File imagem = new File(txtDiretorioImagemEqui.getText());
-            if (!imagem.exists()) {
-                JOptionPane.showMessageDialog(null, "Imagem não encontrada no caminho informado.");
-                return;
-            }
+        try (PreparedStatement pst = conexao.prepareStatement(sql);
+                FileInputStream fis = new FileInputStream(imagem)) {
 
-            // Preparando a conexão
-            pst = conexao.prepareStatement(sql);
             pst.setString(1, txtEtiquetaEqui.getText());
             pst.setString(2, cboTipoEqui.getSelectedItem().toString());
             pst.setString(3, txtMarcaEqui.getText());
             pst.setString(4, cboSetorEqui.getSelectedItem().toString());
             pst.setString(5, txtFuncionarioEqui.getText());
-            pst.setString(6, txtValorEqui.getText().replace(",", ".")); // Valor numérico com "." decimal
-
-            // Lendo a imagem
-            fis = new FileInputStream(imagem);
-            pst.setBinaryStream(7, fis, (int) imagem.length());
-
+            pst.setDouble(6, Double.parseDouble(txtValorEqui.getText().replace(",", ".")));
+            pst.setBinaryStream(7, fis, imagem.length());
             pst.setString(8, txtDescricaoEqui.getText());
-            pst.setString(9, txtCondEqui.getText()); // condicoes_equipamento
-            pst.setString(10, cboStatusEqui.getSelectedItem().toString()); // status
-            pst.setString(11, txtIdEqui.getText());         // idequipamento
-            pst.setString(12, cboFilialEqui.getSelectedItem().toString());
-            pst.setString(13, txtQuantidadeEqui.getText());
+            pst.setString(9, txtCondEqui.getText());
+            pst.setString(10, cboStatusEqui.getSelectedItem().toString());
+            pst.setInt(11, Integer.parseInt(cboFilialEqui.getSelectedItem().toString()));
 
-            int atualizado = pst.executeUpdate();
-            if (atualizado > 0) {
-                JOptionPane.showMessageDialog(null, "Equipamento atualizado com sucesso!");
-                limpar_campos(); // Limpando os campos
-                exibir_todos_equipamentos_dashboard();
-                atualizarTotalEquipamentos();
+            if (dtSaidaEqui.getDate() != null) {
+                pst.setTimestamp(12,
+                        new java.sql.Timestamp(dtSaidaEqui.getDate().getTime()));
+            } else {
+                pst.setNull(12, java.sql.Types.TIMESTAMP);
             }
 
-        } catch (FileNotFoundException fnfe) {
-            JOptionPane.showMessageDialog(null, "Arquivo de imagem não encontrado: " + fnfe.getMessage());
+            pst.setInt(13, Integer.parseInt(txtQuantidadeEqui.getText()));
+            pst.setInt(14, Integer.parseInt(txtIdEqui.getText()));
+
+            pst.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Equipamento alterado com sucesso!");
+
+            limpar_campos();
+            exibir_todos_equipamentos_dashboard();
+            atualizarTotalEquipamentos();
+            atualizarDashboardSeAberto();
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao atualizar: " + e);
-        } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Erro ao fechar o arquivo de imagem: " + e);
-            }
+            JOptionPane.showMessageDialog(null, "Erro ao alterar: " + e.getMessage());
         }
     }
 
     //criando o método para excluir um Equipamento
     private void excluir_equipamento() {
-        int confirma = JOptionPane.showConfirmDialog(null, "Você tem certeza que deseja "
-                + "excluir este equipamento?", "Atenção", JOptionPane.YES_NO_OPTION);
+        int confirma = JOptionPane.showConfirmDialog(
+                null,
+                "Deseja realmente excluir este equipamento?",
+                "Atenção",
+                JOptionPane.YES_NO_OPTION
+        );
+
         if (confirma == JOptionPane.YES_OPTION) {
-            String sql = "delete from equipamentos where idequipamento = ?";
-            try {
-                pst = conexao.prepareStatement(sql);
-                pst.setString(1, txtIdEqui.getText());
-                int excluido = pst.executeUpdate();
-                if (excluido > 0) {
-                    JOptionPane.showMessageDialog(null, "Equipamento excluido com sucesso!");
-                    limpar_campos(); // chamando o metodo limpando os campos
-                    exibir_todos_equipamentos_dashboard();
-                    atualizarTotalEquipamentos();
-                }
+
+            String sql = "DELETE FROM equipamentos WHERE idequipamento=?";
+
+            try (PreparedStatement pst = conexao.prepareStatement(sql)) {
+
+                pst.setInt(1, Integer.parseInt(txtIdEqui.getText()));
+                pst.executeUpdate();
+
+                JOptionPane.showMessageDialog(null, "Equipamento excluído com sucesso!");
+
+                limpar_campos();
+                exibir_todos_equipamentos_dashboard();
+                atualizarTotalEquipamentos();
+                atualizarDashboardSeAberto();
+
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, e);
+                JOptionPane.showMessageDialog(null, "Erro ao excluir: " + e.getMessage());
             }
         }
     }
@@ -661,20 +677,31 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
-    // criando o metodo para alterar a imagem
+    /**
+     * Altera apenas a imagem do equipamento selecionado - Atualiza no banco -
+     * Atualiza a imagem na tela - Atualiza o dashboard em tempo real
+     */
     private void alterarImagemEquipamento() {
+
+        // Validação: precisa ter um equipamento selecionado
+        if (txtIdEqui.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Selecione um equipamento primeiro.");
+            return;
+        }
+
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Selecionar nova imagem");
 
-        int resultado = chooser.showOpenDialog(null);
+        int resultado = chooser.showOpenDialog(this);
 
         if (resultado == JFileChooser.APPROVE_OPTION) {
+
             File arquivo = chooser.getSelectedFile();
 
-            try {
-                // LER IMAGEM EM BYTES MANUALMENTE (compatível com Java 7/8)
-                FileInputStream fis = new FileInputStream(arquivo);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (FileInputStream fis = new FileInputStream(arquivo);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
+                // Lê a imagem em bytes
                 byte[] buffer = new byte[1024];
                 int bytesLidos;
 
@@ -683,41 +710,64 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 }
 
                 byte[] imagemBytes = baos.toByteArray();
-                fis.close();
-                baos.close();
 
-                // ATUALIZAR NO BANCO
+                // Atualiza no banco
                 String sql = "UPDATE equipamentos SET foto_equipamento=? WHERE idequipamento=?";
                 pst = conexao.prepareStatement(sql);
-
                 pst.setBytes(1, imagemBytes);
                 pst.setInt(2, Integer.parseInt(txtIdEqui.getText()));
 
-                int atualizou = pst.executeUpdate();
+                int atualizado = pst.executeUpdate();
 
-                if (atualizou > 0) {
+                if (atualizado > 0) {
 
-                    // EXIBIR A IMAGEM NO LABEL
+                    // Atualiza imagem na tela
                     ImageIcon icone = new ImageIcon(imagemBytes);
                     Image img = icone.getImage().getScaledInstance(
                             lblFotoPerfilEqui.getWidth(),
                             lblFotoPerfilEqui.getHeight(),
                             Image.SCALE_SMOOTH
                     );
-
                     lblFotoPerfilEqui.setIcon(new ImageIcon(img));
 
                     JOptionPane.showMessageDialog(null, "Imagem atualizada com sucesso!");
+
+                    // 🔄 Atualiza dashboard se estiver aberto
+                    atualizarDashboardSeAberto();
                 }
 
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Erro ao alterar imagem: " + e);
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Erro ao alterar imagem: " + e.getMessage()
+                );
             }
         }
     }
 
-    // criando o metodo para exlcuir a imagem
+    /**
+     * Remove a imagem do equipamento - Remove do banco - Remove da tela -
+     * Atualiza o dashboard
+     */
     private void excluirImagemEquipamento() {
+
+        // Validação
+        if (txtIdEqui.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Selecione um equipamento primeiro.");
+            return;
+        }
+
+        int confirma = JOptionPane.showConfirmDialog(
+                null,
+                "Deseja realmente remover a imagem deste equipamento?",
+                "Confirmação",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirma != JOptionPane.YES_OPTION) {
+            return;
+        }
+
         String sql = "UPDATE equipamentos SET foto_equipamento = NULL WHERE idequipamento = ?";
 
         try {
@@ -727,11 +777,21 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             int apagou = pst.executeUpdate();
 
             if (apagou > 0) {
-                lblFotoPerfilEqui.setIcon(null); // limpa na tela
+
+                // Remove da tela
+                lblFotoPerfilEqui.setIcon(null);
+
                 JOptionPane.showMessageDialog(null, "Imagem removida com sucesso!");
+
+                // 🔄 Atualiza dashboard se estiver aberto
+                atualizarDashboardSeAberto();
             }
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao excluir imagem: " + e);
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Erro ao excluir imagem: " + e.getMessage()
+            );
         }
     }
 
@@ -855,32 +915,58 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
+    /**
+     * Controla o estado dos botões conforme o contexto
+     */
+    private void gerenciarBotoes(
+            boolean novo,
+            boolean salvar,
+            boolean alterar,
+            boolean excluir,
+            boolean alterarImagem
+    ) {
+        btnNovo.setEnabled(novo);
+        btnSalvarEqui.setEnabled(salvar);
+        btnAtualizarEqui.setEnabled(alterar);
+        btnExcluirEqui.setEnabled(excluir);
+        btnAlterarImagemEqui.setEnabled(alterarImagem);
+    }
+
     // limpar campos e habilitar os botões e gerenciar os botões
     private void limpar_campos() {
         // limpando os campos
         txtIdEqui.setText(null);
         txtEtiquetaEqui.setText(null);
         dtEntradaEqui.setDate(null);
+        dtSaidaEqui.setDate(null);
+
         txtMarcaEqui.setText(null);
-        cboSetorEqui.setSelectedItem(" ");
-        cboTipoEqui.setSelectedItem(" ");
         txtValorEqui.setText(null);
         txtFuncionarioEqui.setText(null);
-        // a linha abaixo limpa a foto do equipamento
-        lblFotoPerfilEqui.setIcon(null);
         txtDescricaoEqui.setText(null);
         txtCondEqui.setText(null);
-        cboStatusEqui.setSelectedItem(" ");
-        //a linha abaixo limpa o campo do diretório da imagem
         txtDiretorioImagemEqui.setText(null);
-        ((DefaultTableModel) tblEquipamentos.getModel()).setRowCount(0); // limpando os dados da tabela
-        dtSaidaEqui.setDate(null);
-        //habilitando novamente os objetos
-        //btnCadastrarEqui.setEnabled(true);
-        //txtIdEqui.setEnabled(true);
-        // desabilitar os botões
-        //btnAtualizarEqui.setEnabled(false);
-        //btnExcluirEqui.setEnabled(false);
+
+        cboSetorEqui.setSelectedIndex(0);
+        cboTipoEqui.setSelectedIndex(0);
+        cboStatusEqui.setSelectedIndex(0);
+        cboFilialEqui.setSelectedIndex(0);
+        cboFornecedorEqui.setSelectedIndex(0);
+
+        // Limpa imagem
+        lblFotoPerfilEqui.setIcon(null);
+
+        // Limpa tabela
+        ((DefaultTableModel) tblEquipamentos.getModel()).setRowCount(0);
+
+        // Volta para modo "Novo Cadastro"
+        gerenciarBotoes(
+                true, // novo
+                true, // salvar
+                false, // alterar
+                false, // excluir
+                false // alterar imagem
+        );
     }
 
     /**
@@ -940,6 +1026,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         btnSalvarEqui = new javax.swing.JButton();
         btnExcluirEqui = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
+        btnNovo = new javax.swing.JButton();
         txtDiretorioImagemEqui = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
@@ -1423,6 +1510,9 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         });
         jPanel4.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, -1, 30));
 
+        btnNovo.setText("Novo");
+        jPanel4.add(btnNovo, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 10, -1, -1));
+
         txtDiretorioImagemEqui.setEditable(false);
         txtDiretorioImagemEqui.setBackground(new java.awt.Color(255, 255, 255));
         txtDiretorioImagemEqui.setFont(new java.awt.Font("Tahoma", 0, 3)); // NOI18N
@@ -1845,6 +1935,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnExcluirEqui;
     private javax.swing.JButton btnExcluirImagemEqui;
     private javax.swing.JButton btnInserirImagemEqui;
+    private javax.swing.JButton btnNovo;
     private javax.swing.JButton btnSalvarEqui;
     private javax.swing.JComboBox cboFilialEqui;
     private javax.swing.JComboBox cboFiltroFilialEqui;

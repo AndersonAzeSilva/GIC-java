@@ -42,34 +42,67 @@ import org.jfree.data.general.DefaultPieDataset;
 public class ScreenDashboard extends javax.swing.JInternalFrame {
 
     // =========================
-    // CONEXÃO COM O BANCO
+    // CONEXÃO
     // =========================
     private Connection conexao = ModuloConexao.conector();
 
-    // Referências dos gráficos
+    // =========================
+    // GRÁFICOS
+    // =========================
     private JFreeChart chartBarra;
-    private JFreeChart chartPizza; //declarando o chartPizza
-    private Timer timerAtualizacao; //declarando o time
+    private JFreeChart chartPizza;
 
-    // Tamanho padrão dos gráficos
-    private static final Dimension TAMANHO_GRAFICO
-            = new Dimension(460, 260);
+    // =========================
+    // TIMER
+    // =========================
+    private Timer timerAtualizacao;
 
-    /**
-     * Construtor da tela
-     */
+    // =====================================================
+    // TIMERS DE ATUALIZAÇÃO (DADOS)
+    // =====================================================
+    private Timer timerAtualizacaoCards;          // Cards (5s)
+    private Timer timerAtualizacaoGraficoBarra;   // Gráfico Barra (1 min)
+    private Timer timerAtualizacaoGraficoPizza;   // Gráfico Pizza (1 min)
+
+    // =====================================================
+    // CONFIGURAÇÃO DE TEMPOS (ALTERE AQUI 👇)
+    // =====================================================
+    private static final int TEMPO_ATUALIZA_CARDS = 50000;       // 5 segundos
+    private static final int TEMPO_ATUALIZA_GRAFICOS = 60000;  // 1 minuto
+
+    // =====================================================
+    // CONFIGURAÇÃO DE ANIMAÇÕES
+    // =====================================================
+    private static final int ANIMACAO_CARD = 15;     // ms
+    private static final int ANIMACAO_BARRA = 30;    // ms
+    private static final int PASSOS_BARRA = 100;
+    private static final int ANIMACAO_PIZZA = 50;    // ms
+
+    // =========================
+    // TAMANHO DINÂMICO
+    // =========================
+    private Dimension tamanhoGrafico = new Dimension(460, 260);
+
+    // =========================
+    // CONSTRUTOR
+    // =========================
     public ScreenDashboard() {
         initComponents();
-        iniciarAtualizacaoAutomatica();
 
-        // Layout para permitir centralização
+        // Layouts dos painéis
         jpBarra.setLayout(new BorderLayout());
         jpPizza.setLayout(new BorderLayout());
 
-        // Carrega dados iniciais
-        atualizarDashboardCompleto();
+        // Primeira carga imediata
+        atualizarCards();
+        carregarGraficoBarra();
+        carregarGraficoPizza();
 
-        // Redesenha os gráficos ao redimensionar a janela
+        // Inicia timers separados
+        iniciarAtualizacaoCards();
+        iniciarAtualizacaoGraficos();
+
+        // Redesenha ao redimensionar
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -78,127 +111,147 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
         });
     }
 
-    /**
-     * Inicia a atualização automática do dashboard Atualiza a cada 5 segundos
-     */
+    // =========================
+    // TIMER AUTOMÁTICO
+    // =========================
     private void iniciarAtualizacaoAutomatica() {
-
-        timerAtualizacao = new Timer(5000, e -> {
-            atualizarDashboardCompleto();
-        });
-
+        timerAtualizacao = new Timer(5000, e -> atualizarDashboardCompleto());
         timerAtualizacao.start();
     }
 
-    // PARAR O TIMER AO FECHAR A TELA (MUITO IMPORTANTE) Evita consumo desnecessário de memória.
+    // =====================================================
+    // TIMER DOS CARDS (5 SEGUNDOS)
+    // =====================================================
+    private void iniciarAtualizacaoCards() {
+        timerAtualizacaoCards = new Timer(
+                TEMPO_ATUALIZA_CARDS,
+                e -> atualizarCards()
+        );
+        timerAtualizacaoCards.start();
+    }
+
+    // =====================================================
+    // TIMER DOS GRÁFICOS (1 MINUTO)
+    // =====================================================
+    private void iniciarAtualizacaoGraficos() {
+
+        // Gráfico de Barras
+        timerAtualizacaoGraficoBarra = new Timer(
+                TEMPO_ATUALIZA_GRAFICOS,
+                e -> carregarGraficoBarra()
+        );
+        timerAtualizacaoGraficoBarra.start();
+
+        // Gráfico de Pizza
+        timerAtualizacaoGraficoPizza = new Timer(
+                TEMPO_ATUALIZA_GRAFICOS,
+                e -> carregarGraficoPizza()
+        );
+        timerAtualizacaoGraficoPizza.start();
+    }
+
     @Override
     public void dispose() {
-        if (timerAtualizacao != null) {
-            timerAtualizacao.stop();
+
+        if (timerAtualizacaoCards != null) {
+            timerAtualizacaoCards.stop();
         }
+        if (timerAtualizacaoGraficoBarra != null) {
+            timerAtualizacaoGraficoBarra.stop();
+        }
+        if (timerAtualizacaoGraficoPizza != null) {
+            timerAtualizacaoGraficoPizza.stop();
+        }
+
         super.dispose();
     }
 
-    // ==================================================
-    // 🔄 ATUALIZA TODO O DASHBOARD
-    // ==================================================
-    /**
-     * Atualiza: - Cards - Gráfico de barras - Gráfico de pizza
-     *
-     * 👉 Chame este método após cadastrar / editar equipamento
-     */
+    // =========================
+    // ATUALIZA TUDO
+    // =========================
     public void atualizarDashboardCompleto() {
         atualizarCards();
         carregarGraficoBarra();
         carregarGraficoPizza();
     }
 
-    // ==================================================
-    // 🔁 REDESENHA OS GRÁFICOS NO RESIZE
-    // ==================================================
-    /**
-     * Mantém os gráficos centralizados e respeitando o tamanho fixo
-     */
+    // =========================
+    // REDESENHAR
+    // =========================
     private void redesenharGraficos() {
-
         if (chartBarra != null) {
-            ChartPanel panelBarra = criarChartPanel(chartBarra);
             jpBarra.removeAll();
-            jpBarra.add(panelBarra, BorderLayout.CENTER);
+            jpBarra.add(criarChartPanel(chartBarra), BorderLayout.CENTER);
             jpBarra.revalidate();
             jpBarra.repaint();
         }
 
         if (chartPizza != null) {
-            ChartPanel panelPizza = criarChartPanel(chartPizza);
             jpPizza.removeAll();
-            jpPizza.add(panelPizza, BorderLayout.CENTER);
+            jpPizza.add(criarChartPanel(chartPizza), BorderLayout.CENTER);
             jpPizza.revalidate();
             jpPizza.repaint();
         }
     }
 
-    // ==================================================
-    // 🟦 ATUALIZA OS CARDS SUPERIORES
-    // ==================================================
-    /**
-     * Atualiza os valores exibidos nos cards
-     */
+    // =========================
+    // TAMANHO PERSONALIZADO
+    // =========================
+    public void setTamanhoGrafico(int largura, int altura) {
+        this.tamanhoGrafico = new Dimension(largura, altura);
+        redesenharGraficos();
+    }
+
+    // =========================
+    // ANIMAÇÃO DOS CARDS
+    // =========================
+    private void animarNumero(javax.swing.JLabel label, int valorFinal) {
+        Timer timer = new Timer(15, null);
+        final int[] valor = {0};
+
+        timer.addActionListener(e -> {
+            if (valor[0] < valorFinal) {
+                valor[0]++;
+                label.setText(String.valueOf(valor[0]));
+            } else {
+                label.setText(String.valueOf(valorFinal));
+                timer.stop();
+            }
+        });
+        timer.start();
+    }
+
     private void atualizarCards() {
         try {
-            lblTotalEquipamentos.setText(
-                    String.valueOf(Dashboard.getTotalEquipamentos())
-            );
+            animarNumero(lblTotalEquipamentos, Dashboard.getTotalEquipamentos());
+            animarNumero(lblAtivos, Dashboard.getTotalPorStatus("Ativo"));
+            animarNumero(lblDevolvidos, Dashboard.getTotalPorStatus("Devolvido"));
+            animarNumero(lblPendentes, Dashboard.getTotalPorStatus("Pendente"));
+            animarNumero(lblReservas, Dashboard.getTotalPorStatus("Reserva"));
 
             lblValorTotal.setText(
-                    "R$ " + String.format("%.2f",
-                            Dashboard.getValorTotalEquipamentos())
-            );
-
-            lblAtivos.setText(
-                    String.valueOf(Dashboard.getTotalPorStatus("Ativo"))
-            );
-
-            lblDevolvidos.setText(
-                    String.valueOf(Dashboard.getTotalPorStatus("Devolvido"))
-            );
-
-            lblPendentes.setText(
-                    String.valueOf(Dashboard.getTotalPorStatus("Pendente"))
-            );
-
-            lblReservas.setText(
-                    String.valueOf(Dashboard.getTotalPorStatus("Reserva"))
+                    "R$ " + String.format("%.2f", Dashboard.getValorTotalEquipamentos())
             );
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Erro ao atualizar cards: " + e.getMessage()
-            );
+            JOptionPane.showMessageDialog(this, "Erro ao atualizar cards: " + e.getMessage());
         }
     }
 
-    // ==================================================
-    // 📊 GRÁFICO DE BARRAS – EQUIPAMENTOS POR TIPO
-    // ==================================================
-    /**
-     * Cria o gráfico de barras: - Quantidade de equipamentos por tipo - Valores
-     * exibidos sobre as barras
-     */
+    // =========================
+    // GRÁFICO DE BARRAS (ANIMADO)
+    // =========================
     private void carregarGraficoBarra() {
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        DefaultCategoryDataset datasetFinal = new DefaultCategoryDataset();
 
-        String sql
-                = "SELECT tipo, COUNT(*) AS total "
-                + "FROM equipamentos GROUP BY tipo";
+        String sql = "SELECT tipo, COUNT(*) total FROM equipamentos GROUP BY tipo";
 
         try (PreparedStatement pst = conexao.prepareStatement(sql);
                 ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-                dataset.addValue(
+                datasetFinal.addValue(
                         rs.getInt("total"),
                         "Equipamentos",
                         rs.getString("tipo")
@@ -209,127 +262,147 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
             System.out.println("Erro gráfico barra: " + e.getMessage());
         }
 
+        animarGraficoBarra(datasetFinal);
+    }
+
+    private void animarGraficoBarra(DefaultCategoryDataset datasetFinal) {
+
+        DefaultCategoryDataset datasetAnimado = new DefaultCategoryDataset();
+
         chartBarra = ChartFactory.createBarChart(
                 "Equipamentos por Tipo",
                 "Tipo",
                 "Quantidade",
-                dataset,
+                datasetAnimado,
                 PlotOrientation.VERTICAL,
-                false,
-                true,
-                false
+                false, true, false
         );
 
-        // ===== ESTILO =====
-        chartBarra.getTitle().setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        estilizarGraficoBarra(chartBarra);
 
-        CategoryPlot plot = chartBarra.getCategoryPlot();
+        ChartPanel panel = criarChartPanel(chartBarra);
+        jpBarra.removeAll();
+        jpBarra.add(panel, BorderLayout.CENTER);
+
+        Timer timer = new Timer(30, null);
+        final int[] passo = {0};
+
+        timer.addActionListener(e -> {
+            datasetAnimado.clear();
+
+            for (int i = 0; i < datasetFinal.getColumnCount(); i++) {
+                int valor = datasetFinal.getValue(0, i).intValue();
+                datasetAnimado.addValue(
+                        Math.min(passo[0], valor),
+                        "Equipamentos",
+                        datasetFinal.getColumnKey(i)
+                );
+            }
+
+            passo[0]++;
+            if (passo[0] > 100) {
+                timer.stop();
+            }
+        });
+
+        timer.start();
+    }
+
+    private void estilizarGraficoBarra(JFreeChart chart) {
+        chart.getTitle().setFont(new Font("Arial", Font.BOLD, 14));
+
+        CategoryPlot plot = chart.getCategoryPlot();
         plot.setBackgroundPaint(Color.WHITE);
         plot.setRangeGridlinePaint(Color.GRAY);
 
         BarRenderer renderer = (BarRenderer) plot.getRenderer();
         renderer.setSeriesPaint(0, new Color(79, 129, 189));
         renderer.setItemMargin(0.15);
-
-        // Valores sobre as barras
-        renderer.setBaseItemLabelGenerator(
-                new StandardCategoryItemLabelGenerator()
-        );
+        renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
         renderer.setBaseItemLabelsVisible(true);
-        renderer.setBaseItemLabelFont(
-                new Font("Arial", Font.BOLD, 10)
-        );
-
-        // Exibe no painel
-        ChartPanel chartPanel = criarChartPanel(chartBarra);
-
-        jpBarra.removeAll();
-        jpBarra.add(chartPanel, BorderLayout.CENTER);
-        jpBarra.revalidate();
-        jpBarra.repaint();
+        renderer.setBaseItemLabelFont(new Font("Arial", Font.BOLD, 10));
     }
 
-    // ==================================================
-    // 🥧 GRÁFICO DE PIZZA – EQUIPAMENTOS POR STATUS
-    // ==================================================
-    /**
-     * Cria o gráfico de pizza: - Quantidade e porcentagem por status
-     */
+    // =========================
+    // GRÁFICO DE PIZZA (ANIMADO)
+    // =========================
     private void carregarGraficoPizza() {
 
-        DefaultPieDataset dataset = new DefaultPieDataset();
+        DefaultPieDataset datasetFinal = new DefaultPieDataset();
 
-        String sql
-                = "SELECT IFNULL(status, 'Não informado') AS status, COUNT(*) AS total "
-                + "FROM equipamentos GROUP BY status";
+        String sql = "SELECT IFNULL(status,'Não informado') status, COUNT(*) total FROM equipamentos GROUP BY status";
 
         try (PreparedStatement pst = conexao.prepareStatement(sql);
                 ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-
-            String status = rs.getString("status");
-            int total = rs.getInt("total");
-
-            // Garantia extra (defensiva)
-            if (status == null || status.trim().isEmpty()) {
-                status = "Não informado";
+                datasetFinal.setValue(rs.getString("status"), rs.getInt("total"));
             }
-
-            dataset.setValue(status, total);
-        }
 
         } catch (Exception e) {
             System.out.println("Erro gráfico pizza: " + e.getMessage());
         }
 
-        chartPizza = ChartFactory.createPieChart(
-                "Equipamentos por Status",
-                dataset,
-                true,
-                true,
-                false
-        );
-
-        chartPizza.getTitle().setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
-
-        PiePlot plot = (PiePlot) chartPizza.getPlot();
-        plot.setBackgroundPaint(Color.WHITE);
-        plot.setLabelFont(
-                new Font("Arial", Font.PLAIN, 10)
-        );
-
-        plot.setLabelGenerator(
-                new StandardPieSectionLabelGenerator(
-                        "{0}: {1} ({2})"
-                )
-        );
-
-        ChartPanel chartPanel = criarChartPanel(chartPizza);
-
-        jpPizza.removeAll();
-        jpPizza.add(chartPanel, BorderLayout.CENTER);
-        jpPizza.revalidate();
-        jpPizza.repaint();
+        animarGraficoPizza(datasetFinal);
     }
 
-    // ==================================================
-    // 🧱 MÉTODO AUXILIAR – CRIA ChartPanel PADRÃO
-    // ==================================================
-    /**
-     * Cria um ChartPanel com tamanho fixo para evitar gráficos grandes demais
-     */
+    private void animarGraficoPizza(DefaultPieDataset datasetFinal) {
+
+        DefaultPieDataset datasetAnimado = new DefaultPieDataset();
+
+        chartPizza = ChartFactory.createPieChart(
+                "Equipamentos por Status",
+                datasetAnimado,
+                true, true, false
+        );
+
+        estilizarGraficoPizza(chartPizza);
+
+        ChartPanel panel = criarChartPanel(chartPizza);
+        jpPizza.removeAll();
+        jpPizza.add(panel, BorderLayout.CENTER);
+
+        Timer timer = new Timer(50, null);
+        final int[] index = {0};
+
+        timer.addActionListener(e -> {
+            if (index[0] < datasetFinal.getItemCount()) {
+                Comparable key = datasetFinal.getKey(index[0]);
+                datasetAnimado.setValue(key, datasetFinal.getValue(key));
+                index[0]++;
+            } else {
+                timer.stop();
+            }
+        });
+
+        timer.start();
+    }
+
+    private void estilizarGraficoPizza(JFreeChart chart) {
+        chart.getTitle().setFont(new Font("Arial", Font.BOLD, 14));
+        PiePlot plot = (PiePlot) chart.getPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setLabelFont(new Font("Arial", Font.PLAIN, 10));
+        plot.setLabelGenerator(
+                new StandardPieSectionLabelGenerator("{0}: {1} ({2})")
+        );
+    }
+
+    // =========================
+    // CHART PANEL PADRÃO
+    // =========================
     private ChartPanel criarChartPanel(JFreeChart chart) {
 
         ChartPanel panel = new ChartPanel(chart);
+        panel.setPreferredSize(tamanhoGrafico);
+        panel.setMinimumSize(new Dimension(300, 200));
 
-        panel.setPreferredSize(TAMANHO_GRAFICO);
-        panel.setMinimumSize(TAMANHO_GRAFICO);
-        panel.setMaximumSize(TAMANHO_GRAFICO);
+        panel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                panel.setPreferredSize(panel.getSize());
+            }
+        });
 
         return panel;
     }
@@ -379,10 +452,13 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
         jpBarra = new javax.swing.JPanel();
         jpPizza = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
 
         setClosable(true);
         setIconifiable(true);
         setMaximizable(true);
+        setTitle("Painel Dashboard");
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -696,7 +772,7 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
                             .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(85, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jpBarra.setBackground(new java.awt.Color(255, 255, 255));
@@ -710,7 +786,7 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
         );
         jpBarraLayout.setVerticalGroup(
             jpBarraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 261, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jpPizza.setBackground(new java.awt.Color(255, 255, 255));
@@ -724,20 +800,38 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
         );
         jpPizzaLayout.setVerticalGroup(
             jpPizzaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 261, Short.MAX_VALUE)
+            .addGap(0, 290, Short.MAX_VALUE)
         );
 
         jPanel1.setBackground(new java.awt.Color(0, 51, 153));
+
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("G&C");
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("Protection");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 163, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -747,14 +841,14 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 703, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jpBarra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jpPizza, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jpPizza, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 703, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12))
+                        .addComponent(jpBarra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -762,14 +856,16 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
                 .addGap(13, 13, 13)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jpBarra, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jpPizza, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jpPizza, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                            .addComponent(jpBarra, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        getAccessibleContext().setAccessibleDescription("");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -777,10 +873,12 @@ public class ScreenDashboard extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ValorTotalEquipamentos;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
