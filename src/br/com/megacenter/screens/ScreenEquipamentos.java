@@ -29,16 +29,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -49,13 +43,6 @@ import javax.swing.table.TableRowSorter;
 import net.proteanit.sql.DbUtils;
 
 // Imports do JFreeChart
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.chart.plot.PlotOrientation;
-
 /**
  *
  * @author JANDERSON
@@ -122,8 +109,23 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
         double valorTotal = Dashboard.getValorTotalEquipamentos();
         lblValorTotal.setText(" R$ " + String.format("%.2f", valorTotal));
-        
-        
+
+        // == == == CARDS POR STATUS ======
+        lblAtivos.setText(
+                String.valueOf(Dashboard.getTotalPorStatus("Ativo"))
+        );
+
+        lblDevolvidos.setText(
+                String.valueOf(Dashboard.getTotalPorStatus("Devolvido"))
+        );
+
+        lblPendentes.setText(
+                String.valueOf(Dashboard.getTotalPorStatus("Pendente"))
+        );
+
+        lblReservas.setText(
+                String.valueOf(Dashboard.getTotalPorStatus("Reserva"))
+        );
     }
 
     private void aplicarFiltro() {
@@ -144,10 +146,11 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
+    ///////////////////////////////////PREENCHE AS INFORMAÇÕES DA TABELA/////////////////////////////////
     // criando o metodo para pesquisar os equipamentos pelo número da etiqueta
     private void pesquisar_equipamento() {
-        String sql = "Select idequipamento as Código, etiqueta_equipamento as Etiqueta, data_cadastrado as Data, tipo as Tipo, marca as Marca, setor as Setor"
-                + ", funcionario as Funcionário, valor as Valor, foto_equipamento as Imagem, descricao as Descrição, condicoes_equipamento as Condições, status as Status, id_filial as Filial,"
+        String sql = "Select idequipamento as Código, codigo_filial as Filial, etiqueta_equipamento as Etiqueta, data_cadastrado as Data, tipo as Tipo, marca as Marca, setor as Setor"
+                + ", funcionario as Funcionário, valor as Valor, foto_equipamento as Imagem, descricao as Descrição, condicoes_equipamento as Condições, status as Status,"
                 + "data_saida as 'Data de Saída', quantidade as Quantidade from equipamentos where etiqueta_equipamento "
                 + "like ?";
         try {
@@ -160,12 +163,27 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
-    // criando o metodo para pesquisar os equipamentos pelo nome do equipamento
+    // Método para exibir todos os equipamentos cadastrados na tabela
+    private void exibir_todos_equipamentos_dashboard() {
+        String sql = "SELECT idequipamento as Código, codigo_filial as Filial, etiqueta_equipamento as Etiqueta, tipo as Tipo, descricao as Descrição, "
+                + "setor as Setor, funcionario as Funcionário, valor as Valor, quantidade as Quantidade, codigo_empresa as Fornecedor, data_cadastrado as 'Data da Entrada', "
+                + "data_saida as 'Data de Saída', status as Status, marca as Marca, condicoes_equipamento as Condições FROM equipamentos";
+        try {
+            pst = conexao.prepareStatement(sql);
+            rs = pst.executeQuery();
+            tblEquipamentos.setModel(DbUtils.resultSetToTableModel(rs));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////PESQUISA////////////////////////////////////////////////////////
+    // criando o metodo para pesquisar os equipamentos pela Etiqueta do equipamento e exibir na tabela
     private void exibir_pesquisar_equipamento() {
-        String sql = "Select idequipamento as Código, etiqueta_equipamento as Etiqueta, data_cadastrado as Data, tipo as Tipo, marca as Marca, setor as Setor"
-                + ", funcionario as Funcionário, valor as Valor, foto_equipamento as Imagem, descricao as Descrição, condicoes_equipamento as Condições, status as Status, id_filial as Filial,"
-                + "data_saida as 'Data de Saída', quantidade as Quantidade from equipamentos where etiqueta_equipamento "
-                + "like ?";
+        String sql = "Select idequipamento as Código, codigo_filial as Filial, etiqueta_equipamento as Etiqueta, tipo as Tipo, descricao as Descrição, "
+                + "setor as Setor, funcionario as Funcionário, valor as Valor, quantidade as Quantidade, codigo_empresa as Fornecedor, data_cadastrado as 'Data da Entrada', "
+                + "data_saida as 'Data de Saída', status as Status, marca as Marca, condicoes_equipamento as Condições from equipamentos where etiqueta_equipamento like ?";
         try {
             pst = conexao.prepareStatement(sql);
             pst.setString(1, txtPesquisaEqui.getText() + "%");
@@ -178,10 +196,9 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
     // criando o metodo para pesquisar os equipamentos pelo nome do equipamento
     private void filtro_pesquisar_equipamento() {
-        String sql = "SELECT idequipamento AS Código, etiqueta_equipamento AS Etiqueta, data_cadastrado AS Data, tipo AS Tipo,"
-                + " marca AS Marca, setor AS Setor, funcionario AS Funcionário, valor AS Valor, foto_equipamento AS Imagem,"
-                + " condicoes_equipamento AS Condições, status AS Status, id_filial AS Filial, data_saida AS 'Data de Saída', quantidade AS Quantidade"
-                + " FROM equipamentos WHERE descricao LIKE ?";
+        String sql = "Select idequipamento as Código, codigo_filial as Filial, etiqueta_equipamento as Etiqueta, tipo as Tipo, descricao as Descrição, "
+                + "setor as Setor, funcionario as Funcionário, valor as Valor, quantidade as Quantidade, codigo_empresa as Fornecedor, data_cadastrado as 'Data da Entrada', "
+                + "data_saida as 'Data de Saída', status as Status, marca as Marca, condicoes_equipamento as Condições from equipamentos where descricao like ?";
 
         try {
             pst = conexao.prepareStatement(sql);
@@ -193,20 +210,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
-    // Método para exibir todos os equipamentos cadastrados
-    private void exibir_todos_equipamentos_dashboard() {
-        String sql = "SELECT idequipamento as Código, etiqueta_equipamento as Etiqueta, data_cadastrado as Data, tipo as Tipo, "
-                + "marca as Marca, setor as Setor, funcionario as Funcionário, valor as Valor, foto_equipamento as Imagem, "
-                + "descricao as Descrição, condicoes_equipamento as Condições, status as Status FROM equipamentos";
-        try {
-            pst = conexao.prepareStatement(sql);
-            rs = pst.executeQuery();
-            tblEquipamentos.setModel(DbUtils.resultSetToTableModel(rs));
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e);
-        }
-    }
-
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Método para deixar a tabela somente para visualização
     private void bloquearEdicaoTabela() {
         // Impede edição de células
@@ -219,7 +223,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         tblEquipamentos.getTableHeader().setResizingAllowed(false);
     }
 
-    // Criando o metodo para preencher as culas da tabela de acordo com o banco de dados
+    ///////////Criando o metodo para preencher as culas da tabela do dashboard de acordo com o banco de dados/////////
     private void preencher_campos() {
         try {
             conexao = ModuloConexao.conector(); // Garante que está conectado ao banco
@@ -231,9 +235,17 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
             // Preenchendo os campos de texto com tratamento para valores null
             txtIdEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 0)));
-            txtEtiquetaEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 1)));
+            cboFilialEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 1)));
+            txtEtiquetaEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 2)));
+            cboTipoEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 3)));
+            txtDescricaoEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 4)));
+            cboSetorEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 5)));
+            txtFuncionarioEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 6)));
+            txtValorEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 7)));
+            txtQuantidadeEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 8)));
+            cboFornecedorEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 9)));
             // DATA: trate corretamente conforme o tipo vindo do model
-            Object valorData = tblEquipamentos.getModel().getValueAt(preencher, 2);
+            Object valorData = tblEquipamentos.getModel().getValueAt(preencher, 10);
             if (valorData instanceof java.util.Date) {
                 // Timestamp também é instanceOf java.util.Date
                 dtEntradaEqui.setDate((java.util.Date) valorData);
@@ -253,18 +265,9 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             } else {
                 dtEntradaEqui.setDate(null);
             }
-            cboTipoEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 3)));
-            txtMarcaEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 4)));
-            cboSetorEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 5)));
-            txtFuncionarioEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 6)));
-            txtValorEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 7)));
-            txtDescricaoEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 8)));
-            txtCondEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 9)));
-            cboStatusEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 10)));
-            cboFilialEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 11)));
 
             // DATA: trate corretamente conforme o tipo vindo do model
-            Object valorDataa = tblEquipamentos.getModel().getValueAt(preencher, 12);
+            Object valorDataa = tblEquipamentos.getModel().getValueAt(preencher, 11);
             if (valorDataa instanceof java.util.Date) {
                 // Timestamp também é instanceOf java.util.Date
                 dtSaidaEqui.setDate((java.util.Date) valorDataa);
@@ -281,11 +284,11 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 } else {
                     dtSaidaEqui.setDate(null);
                 }
-            } else {
-                dtSaidaEqui.setDate(null);
             }
 
-            txtQuantidadeEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 13)));
+            cboStatusEqui.setSelectedItem(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 12)));
+            txtMarcaEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 13)));
+            txtCondEqui.setText(valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 14)));
 
             // Carregando imagem a partir do banco
             String idStr = valorOuVazio(tblEquipamentos.getModel().getValueAt(preencher, 0));
@@ -322,188 +325,186 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
-    // Criando o metodo para exibir as informações nos campos da tabela
+    //////////////Criando o metodo para exibir as informações nos campos da tabela de cadastro////////////////////////////////////
     private void exibir_campos() {
         try {
-            conexao = ModuloConexao.conector();
+            conexao = ModuloConexao.conector(); // Garante que está conectado ao banco
 
-            int linha = tblEquipamentos3.getSelectedRow();
-            if (linha == -1) {
+            int preencher = tblEquipamentos3.getSelectedRow();
+            if (preencher == -1) {
                 return;
             }
 
-            // ===== CAMPOS BÁSICOS =====
-            // Ordem esperada do SELECT na JTable:
-            // 0-id | 1-etiqueta | 2-data_cadastrado | 3-tipo | 4-marca | 5-setor
-            // 6-funcionario | 7-valor | 8-descricao | 9-condicoes | 10-status
-            // 11-quantidade | 12-id_filial | 13-data_saida
-            txtIdEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 0)));
-            txtEtiquetaEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 1)));
-
-            // ===== DATA DE ENTRADA =====
-            Object dataEntrada = tblEquipamentos3.getValueAt(linha, 2);
-            dtEntradaEqui.setDate(converterParaDate(dataEntrada));
-
-            cboTipoEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getValueAt(linha, 3)));
-            txtMarcaEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 4)));
-            cboSetorEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getValueAt(linha, 5)));
-            txtFuncionarioEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 6)));
-            txtValorEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 7)));
-
-            txtDescricaoEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 8)));
-            txtCondEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 9)));
-            cboStatusEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getValueAt(linha, 10)));
-            txtQuantidadeEqui.setText(valorOuVazio(tblEquipamentos3.getValueAt(linha, 11)));
-
-            // ===== FILIAL =====
-            cboFilialEqui.setSelectedItem(
-                    valorOuVazio(tblEquipamentos3.getValueAt(linha, 12))
-            );
-
-            // ===== DATA DE SAÍDA =====
-            Object dataSaida = tblEquipamentos3.getValueAt(linha, 13);
-            dtSaidaEqui.setDate(converterParaDate(dataSaida));
-
-            // ===== IMAGEM (BUSCA DIRETA NO BANCO) =====
-            int idEquipamento = Integer.parseInt(txtIdEqui.getText());
-
-            String sqlImg = "SELECT foto_equipamento FROM equipamentos WHERE idequipamento = ?";
-            PreparedStatement pstImg = conexao.prepareStatement(sqlImg);
-            pstImg.setInt(1, idEquipamento);
-            ResultSet rs = pstImg.executeQuery();
-
-            if (rs.next()) {
-                byte[] imgBytes = rs.getBytes("foto_equipamento");
-
-                if (imgBytes != null && imgBytes.length > 0) {
-                    ImageIcon icon = new ImageIcon(imgBytes);
-                    Image img = icon.getImage().getScaledInstance(
-                            lblFotoPerfilEqui.getWidth(),
-                            lblFotoPerfilEqui.getHeight(),
-                            Image.SCALE_SMOOTH
-                    );
-                    lblFotoPerfilEqui.setIcon(new ImageIcon(img));
-                    lblFotoPerfilEqui.setText("");
+            // Preenchendo os campos de texto com tratamento para valores null
+            txtIdEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 0)));
+            cboFilialEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 1)));
+            txtEtiquetaEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 2)));
+            cboTipoEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 3)));
+            txtDescricaoEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 4)));
+            cboSetorEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 5)));
+            txtFuncionarioEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 6)));
+            txtValorEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 7)));
+            txtQuantidadeEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 8)));
+            cboFornecedorEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 9)));
+            // DATA: trate corretamente conforme o tipo vindo do model
+            Object valorData = tblEquipamentos3.getModel().getValueAt(preencher, 10);
+            if (valorData instanceof java.util.Date) {
+                // Timestamp também é instanceOf java.util.Date
+                dtEntradaEqui.setDate((java.util.Date) valorData);
+            } else if (valorData instanceof String) {
+                String s = ((String) valorData).trim();
+                if (!s.isEmpty()) {
+                    try {
+                        // ajustar o padrão conforme o formato da String (ex: "yyyy-MM-dd" ou "dd/MM/yyyy")
+                        java.util.Date dataConvertida = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(s);
+                        dtEntradaEqui.setDate(dataConvertida);
+                    } catch (java.text.ParseException ex) {
+                        dtEntradaEqui.setDate(null); // ou tratar de outra forma
+                    }
                 } else {
-                    lblFotoPerfilEqui.setIcon(null);
-                    lblFotoPerfilEqui.setText("Sem imagem");
+                    dtEntradaEqui.setDate(null);
+                }
+            } else {
+                dtEntradaEqui.setDate(null);
+            }
+
+            // DATA: trate corretamente conforme o tipo vindo do model
+            Object valorDataa = tblEquipamentos3.getModel().getValueAt(preencher, 11);
+            if (valorDataa instanceof java.util.Date) {
+                // Timestamp também é instanceOf java.util.Date
+                dtSaidaEqui.setDate((java.util.Date) valorDataa);
+            } else if (valorDataa instanceof String) {
+                String s = ((String) valorDataa).trim();
+                if (!s.isEmpty()) {
+                    try {
+                        // ajustar o padrão conforme o formato da String (ex: "yyyy-MM-dd" ou "dd/MM/yyyy")
+                        java.util.Date dataConvertida = new java.text.SimpleDateFormat("yyyy-MM-dd").parse(s);
+                        dtSaidaEqui.setDate(dataConvertida);
+                    } catch (java.text.ParseException ex) {
+                        dtSaidaEqui.setDate(null); // ou tratar de outra forma
+                    }
+                } else {
+                    dtSaidaEqui.setDate(null);
                 }
             }
 
-            rs.close();
-            pstImg.close();
+            cboStatusEqui.setSelectedItem(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 12)));
+            txtMarcaEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 13)));
+            txtCondEqui.setText(valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 14)));
+
+            // Carregando imagem a partir do banco
+            String idStr = valorOuVazio(tblEquipamentos3.getModel().getValueAt(preencher, 0));
+            if (!idStr.isEmpty()) {
+                int id = Integer.parseInt(idStr);
+                String sql = "SELECT foto_equipamento FROM equipamentos WHERE idequipamento = ?";
+                PreparedStatement pstImg = conexao.prepareStatement(sql);
+                pstImg.setInt(1, id);
+                ResultSet rs = pstImg.executeQuery();
+
+                if (rs.next()) {
+                    byte[] imgBytes = rs.getBytes("foto_equipamento");
+                    if (imgBytes != null && imgBytes.length > 0) {
+                        ImageIcon imageIcon = new ImageIcon(imgBytes);
+                        Image img = imageIcon.getImage().getScaledInstance(
+                                lblFotoPerfilEqui.getWidth(),
+                                lblFotoPerfilEqui.getHeight(),
+                                Image.SCALE_SMOOTH
+                        );
+                        lblFotoPerfilEqui.setIcon(new ImageIcon(img));
+                        lblFotoPerfilEqui.setText("");
+                    } else {
+                        lblFotoPerfilEqui.setIcon(null);
+                        lblFotoPerfilEqui.setText("Sem imagem");
+                    }
+                }
+
+                rs.close();
+                pstImg.close();
+            }
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao exibir dados: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao preencher os campos: " + e.getMessage());
         }
     }
 
-    // MEtodo auxiliar para datas
-    private java.util.Date converterParaDate(Object valor) {
-        try {
-            if (valor instanceof java.util.Date) {
-                return (java.util.Date) valor;
-            }
-            if (valor instanceof String && !((String) valor).trim().isEmpty()) {
-                return new java.text.SimpleDateFormat("yyyy-MM-dd").parse(valor.toString());
-            }
-        } catch (Exception e) {
-            // ignora
-        }
-        return null;
-    }
-
-    // A linha abaixo cria o método para cadastrar equipamentos
     private void cadastrar_equipamento() {
-        String sql = "INSERT INTO equipamentos ("
-                + "etiqueta_equipamento, tipo, Data_cadastrado, marca, setor, funcionario, valor, "
-                + "foto_equipamento, descricao, condicoes_equipamento, status, id_filial, data_saida, quantidade"
-                + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Validação de campos obrigatórios
+        String sql = "INSERT INTO equipamentos "
+                + "(codigo_filial, etiqueta_equipamento, tipo, descricao, setor, funcionario, valor, quantidade, "
+                + "codigo_empresa, data_cadastrado, data_saida, status, marca, condicoes_equipamento, foto_equipamento) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         if (txtEtiquetaEqui.getText().trim().isEmpty()
                 || txtFuncionarioEqui.getText().trim().isEmpty()
                 || cboSetorEqui.getSelectedItem() == null
                 || cboTipoEqui.getSelectedItem() == null
-                || cboSetorEqui.getSelectedItem().toString().trim().isEmpty()
-                || cboTipoEqui.getSelectedItem().toString().trim().isEmpty()
                 || dtEntradaEqui.getDate() == null) {
 
-            JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios.");
+            JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
             return;
         }
 
-        // Validação da imagem
-        File imagem = null;
-        boolean temImagem = false;
-
-        if (!txtDiretorioImagemEqui.getText().trim().isEmpty()) {
-            imagem = new File(txtDiretorioImagemEqui.getText());
-            if (imagem.exists() && imagem.isFile()) {
-                temImagem = true;
-            }
+        File imagem = new File(txtDiretorioImagemEqui.getText());
+        if (!imagem.exists()) {
+            JOptionPane.showMessageDialog(null, "Imagem não encontrada.");
+            return;
         }
 
         try (PreparedStatement pst = conexao.prepareStatement(sql);
-                FileInputStream fis = temImagem ? new FileInputStream(imagem) : null) {
+                FileInputStream fis = new FileInputStream(imagem)) {
 
-            pst.setString(1, txtEtiquetaEqui.getText().trim());
-            pst.setString(2, cboTipoEqui.getSelectedItem().toString());
-
-            java.util.Date utilDate = dtEntradaEqui.getDate();
-            java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-            pst.setDate(3, sqlDate);
-
-            pst.setString(4, txtMarcaEqui.getText().trim());
+            pst.setInt(1, Integer.parseInt(cboFilialEqui.getSelectedItem().toString()));
+            pst.setInt(2, Integer.parseInt(txtEtiquetaEqui.getText()));
+            pst.setString(3, cboTipoEqui.getSelectedItem().toString());
+            pst.setString(4, txtDescricaoEqui.getText());
             pst.setString(5, cboSetorEqui.getSelectedItem().toString());
-            pst.setString(6, txtFuncionarioEqui.getText().trim());
+            pst.setString(6, txtFuncionarioEqui.getText());
+            pst.setString(7, txtValorEqui.getText().replace(",", "."));
+            pst.setString(8, txtQuantidadeEqui.getText());
+            pst.setString(9, cboFornecedorEqui.getSelectedItem().toString());
 
-            // Valor
-            try {
-                double valor = Double.parseDouble(txtValorEqui.getText().replace(",", "."));
-                pst.setDouble(7, valor);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Valor inválido. Digite um número válido.");
-                return;
-            }
+            pst.setTimestamp(10, new java.sql.Timestamp(dtEntradaEqui.getDate().getTime()));
 
-            // 📸 FOTO OPCIONAL
-            if (temImagem) {
-                pst.setBinaryStream(8, fis, (int) imagem.length());
+            if (dtSaidaEqui.getDate() != null) {
+                pst.setTimestamp(11, new java.sql.Timestamp(dtSaidaEqui.getDate().getTime()));
             } else {
-                pst.setNull(8, java.sql.Types.BLOB);
+                pst.setNull(11, java.sql.Types.TIMESTAMP);
             }
 
-            pst.setBinaryStream(8, fis, (int) imagem.length());
-            pst.setString(9, txtDescricaoEqui.getText().trim());
-            pst.setString(10, txtCondEqui.getText().trim());
-            pst.setString(11, cboStatusEqui.getSelectedItem().toString());
+            pst.setString(12, cboStatusEqui.getSelectedItem().toString());
+            pst.setString(13, txtMarcaEqui.getText());
+            pst.setString(14, txtCondEqui.getText());
+            pst.setBinaryStream(15, fis, imagem.length());
 
-            // 🔥 CORREÇÃO DO ERRO (id_filial é INT)
-            int idFilial = Integer.parseInt(cboFilialEqui.getSelectedItem().toString());
-            pst.setInt(12, idFilial);
+            pst.executeUpdate();
 
-            // data_saida (não informada no cadastro)
-            pst.setNull(13, java.sql.Types.TIMESTAMP);
+            JOptionPane.showMessageDialog(null, "Equipamento cadastrado com sucesso!");
+            limpar_campos(); //chamando o metodo
+            exibir_todos_equipamentos_dashboard(); //chamando o metodo
+            atualizarTotalEquipamentos(); //chamando o metodo
 
-            // quantidade (INT)
-            int quantidade = Integer.parseInt(txtQuantidadeEqui.getText());
-            pst.setInt(14, quantidade);
+            // ===============================
+            // 🔄 ATUALIZA O DASHBOARD EM TEMPO REAL
+            // ===============================
+            java.awt.Window window
+                    = javax.swing.SwingUtilities.getWindowAncestor(this);
 
-            // Executa inserção
-            int adicionado = pst.executeUpdate();
-            if (adicionado > 0) {
-                JOptionPane.showMessageDialog(null, "Equipamento cadastrado com sucesso.");
-                limpar_campos();
-                exibir_todos_equipamentos_dashboard();
+            if (window instanceof ScreenPrincipal) {
+
+                ScreenPrincipal principal = (ScreenPrincipal) window;
+
+                ScreenDashboard dashboard = principal.getDashboard();
+
+                if (dashboard != null && !dashboard.isClosed()) {
+                    dashboard.atualizarDashboardCompleto();
+                }
             }
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao salvar as informações no banco: " + e.getMessage());
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar a imagem: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro SQL: " + e.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro inesperado: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro inesperado: " + e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -513,82 +514,61 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 + "descricao=?, condicoes_equipamento=?, status=?, id_filial=?, data_saida=?, quantidade=? WHERE idequipamento=?";
 
         FileInputStream fis = null;
-        File imagem = null;
-        boolean temImagem = false;
 
         try {
             // Validação dos campos obrigatórios
-            if (txtEtiquetaEqui.getText().isEmpty()
-                    || txtFuncionarioEqui.getText().isEmpty()
-                    || cboSetorEqui.getSelectedItem() == null
-                    || cboTipoEqui.getSelectedItem() == null) {
-
+            if (txtEtiquetaEqui.getText().isEmpty() || txtFuncionarioEqui.getText().isEmpty()
+                    || cboSetorEqui.getSelectedItem().equals(" ") || cboTipoEqui.getSelectedItem().equals(" ")) {
                 JOptionPane.showMessageDialog(null, "Por favor, preencha todos os campos obrigatórios.");
                 return;
             }
 
-            // 🔥 IMAGEM AGORA É OPCIONAL
-            if (!txtDiretorioImagemEqui.getText().trim().isEmpty()) {
-                imagem = new File(txtDiretorioImagemEqui.getText());
-                if (!imagem.exists() || !imagem.isFile()) {
-                    JOptionPane.showMessageDialog(null, "Imagem não encontrada no caminho informado.");
-                    return;
-                }
-                temImagem = true;
+            // Verifica se o arquivo de imagem existe
+            File imagem = new File(txtDiretorioImagemEqui.getText());
+            if (!imagem.exists()) {
+                JOptionPane.showMessageDialog(null, "Imagem não encontrada no caminho informado.");
+                return;
             }
 
+            // Preparando a conexão
             pst = conexao.prepareStatement(sql);
-
             pst.setString(1, txtEtiquetaEqui.getText());
             pst.setString(2, cboTipoEqui.getSelectedItem().toString());
             pst.setString(3, txtMarcaEqui.getText());
             pst.setString(4, cboSetorEqui.getSelectedItem().toString());
             pst.setString(5, txtFuncionarioEqui.getText());
-            pst.setString(6, txtValorEqui.getText().replace(",", "."));
+            pst.setString(6, txtValorEqui.getText().replace(",", ".")); // Valor numérico com "." decimal
 
-            // 📸 FOTO OPCIONAL
-            if (temImagem) {
-                fis = new FileInputStream(imagem);
-                pst.setBinaryStream(7, fis, (int) imagem.length());
-            } else {
-                pst.setNull(7, java.sql.Types.BLOB);
-            }
+            // Lendo a imagem
+            fis = new FileInputStream(imagem);
+            pst.setBinaryStream(7, fis, (int) imagem.length());
 
             pst.setString(8, txtDescricaoEqui.getText());
-            pst.setString(9, txtCondEqui.getText());
-            pst.setString(10, cboStatusEqui.getSelectedItem().toString());
-
-            // id_filial (INT)
-            int idFilial = Integer.parseInt(cboFilialEqui.getSelectedItem().toString());
-            pst.setInt(11, idFilial);
-
-            // data_saida (não alterada)
-            pst.setNull(12, java.sql.Types.TIMESTAMP);
-
-            // quantidade (INT)
-            int quantidade = Integer.parseInt(txtQuantidadeEqui.getText());
-            pst.setInt(13, quantidade);
-
-            // WHERE idequipamento
-            pst.setInt(14, Integer.parseInt(txtIdEqui.getText()));
+            pst.setString(9, txtCondEqui.getText()); // condicoes_equipamento
+            pst.setString(10, cboStatusEqui.getSelectedItem().toString()); // status
+            pst.setString(11, txtIdEqui.getText());         // idequipamento
+            pst.setString(12, cboFilialEqui.getSelectedItem().toString());
+            pst.setString(13, txtQuantidadeEqui.getText());
 
             int atualizado = pst.executeUpdate();
             if (atualizado > 0) {
                 JOptionPane.showMessageDialog(null, "Equipamento atualizado com sucesso!");
-                limpar_campos();
+                limpar_campos(); // Limpando os campos
+                exibir_todos_equipamentos_dashboard();
+                atualizarTotalEquipamentos();
             }
 
         } catch (FileNotFoundException fnfe) {
             JOptionPane.showMessageDialog(null, "Arquivo de imagem não encontrado: " + fnfe.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao atualizar: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao atualizar: " + e);
         } finally {
             try {
                 if (fis != null) {
                     fis.close();
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Erro ao fechar o arquivo de imagem: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Erro ao fechar o arquivo de imagem: " + e);
             }
         }
     }
@@ -606,6 +586,8 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 if (excluido > 0) {
                     JOptionPane.showMessageDialog(null, "Equipamento excluido com sucesso!");
                     limpar_campos(); // chamando o metodo limpando os campos
+                    exibir_todos_equipamentos_dashboard();
+                    atualizarTotalEquipamentos();
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e);
@@ -669,7 +651,9 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             if (atualizado > 0) {
                 JOptionPane.showMessageDialog(null, "Equipamento atualizado com sucesso!");
                 exibir_todos_equipamentos_dashboard();
+                atualizarTotalEquipamentos();
                 limpar_campos();
+
             }
 
         } catch (Exception e) {
@@ -871,35 +855,30 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         }
     }
 
-    // Limpar campos e resetar estado da tela
+    // limpar campos e habilitar os botões e gerenciar os botões
     private void limpar_campos() {
-
-        // ===== CAMPOS DE TEXTO =====
-        txtIdEqui.setText("");
-        txtEtiquetaEqui.setText("");
-        txtMarcaEqui.setText("");
-        txtValorEqui.setText("");
-        txtFuncionarioEqui.setText("");
-        txtDescricaoEqui.setText("");
-        txtCondEqui.setText("");
-        txtDiretorioImagemEqui.setText("");
-
-        // ===== DATAS =====
+        // limpando os campos
+        txtIdEqui.setText(null);
+        txtEtiquetaEqui.setText(null);
         dtEntradaEqui.setDate(null);
-        dtSaidaEqui.setDate(null);
-
-        // ===== COMBOS =====
-        cboSetorEqui.setSelectedIndex(0);
-        cboTipoEqui.setSelectedIndex(0);
-        cboStatusEqui.setSelectedIndex(0);
-        cboFilialEqui.setSelectedIndex(0);
-
-        // ===== IMAGEM =====
+        txtMarcaEqui.setText(null);
+        cboSetorEqui.setSelectedItem(" ");
+        cboTipoEqui.setSelectedItem(" ");
+        txtValorEqui.setText(null);
+        txtFuncionarioEqui.setText(null);
+        // a linha abaixo limpa a foto do equipamento
         lblFotoPerfilEqui.setIcon(null);
-        lblFotoPerfilEqui.setText("Sem imagem");
-
-        // ===== BOTÕES (AJUSTE CONFORME SUA REGRA) =====
+        txtDescricaoEqui.setText(null);
+        txtCondEqui.setText(null);
+        cboStatusEqui.setSelectedItem(" ");
+        //a linha abaixo limpa o campo do diretório da imagem
+        txtDiretorioImagemEqui.setText(null);
+        ((DefaultTableModel) tblEquipamentos.getModel()).setRowCount(0); // limpando os dados da tabela
+        dtSaidaEqui.setDate(null);
+        //habilitando novamente os objetos
         //btnCadastrarEqui.setEnabled(true);
+        //txtIdEqui.setEnabled(true);
+        // desabilitar os botões
         //btnAtualizarEqui.setEnabled(false);
         //btnExcluirEqui.setEnabled(false);
     }
@@ -931,15 +910,27 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         jPanel12 = new javax.swing.JPanel();
         ValorTotalEquipamentos = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         lblTotalEquipamentos = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         jPanel13 = new javax.swing.JPanel();
+        jPanel14 = new javax.swing.JPanel();
+        jLabel15 = new javax.swing.JLabel();
+        lblPendentes = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jPanel15 = new javax.swing.JPanel();
+        lblAtivos = new javax.swing.JLabel();
+        jPanel16 = new javax.swing.JPanel();
+        jLabel35 = new javax.swing.JLabel();
+        jLabel36 = new javax.swing.JLabel();
+        jPanel17 = new javax.swing.JPanel();
+        lblReservas = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
         txtQuantidadePorTipo = new javax.swing.JTextField();
         jPanel9 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -948,6 +939,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         btnConsultarEqui = new javax.swing.JButton();
         btnSalvarEqui = new javax.swing.JButton();
         btnExcluirEqui = new javax.swing.JButton();
+        btnCancelar = new javax.swing.JButton();
         txtDiretorioImagemEqui = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel19 = new javax.swing.JLabel();
@@ -1007,6 +999,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
         setClosable(true);
         setIconifiable(true);
+        setMaximizable(true);
         setTitle("203 - Cadastrar Equipamento");
         setToolTipText("");
 
@@ -1018,7 +1011,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Etiq. Equipamento", "Tipo", "Marca", "Setor", "Funcionário", "Valor", "Imagem", "Descrição"
+                "Etiqueta", "Filial", "Tipo", "Descrição", "Setor", "Funcionário", "Valor", "Quantidade", "Fornecedor", "Data da Entrada", "Data da Saída", "Status", "Marca", "Condições"
             }
         ));
         tblEquipamentos.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -1028,9 +1021,10 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tblEquipamentos);
 
-        jPanel6.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, 920, 370));
+        jPanel6.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 370, 940, 310));
 
         jPanel11.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jPanel8.setBackground(new java.awt.Color(255, 0, 0));
         jPanel8.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -1101,7 +1095,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 .addComponent(jLabel26)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(ValorTotalEquipamentos, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(114, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
         jPanel12Layout.setVerticalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1113,12 +1107,12 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 .addGap(0, 12, Short.MAX_VALUE))
         );
 
-        jPanel3.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 300, -1));
+        jPanel3.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 220, -1));
 
-        jLabel25.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel25.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel25.setText("Despesas com equipamentos");
-        jPanel3.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 108, 200, -1));
+        jLabel28.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel28.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel28.setText("Despesas com equipamentos");
+        jPanel3.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 108, 200, -1));
 
         jPanel2.setBackground(new java.awt.Color(0, 184, 148));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -1137,7 +1131,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Eletronico.png"))); // NOI18N
-        jLabel12.setText("Ativo");
+        jLabel12.setText("Todos");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -1161,28 +1155,150 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         jLabel13.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel13.setText("Painel Dashboard");
 
-        jButton1.setText("Cadastrar Equipamento");
+        jPanel13.setBackground(new java.awt.Color(255, 255, 0));
 
-        txtQuantidadePorTipo.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        txtQuantidadePorTipo.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtQuantidadePorTipo.setEnabled(false);
+        jPanel14.setBackground(new java.awt.Color(255, 255, 102));
+
+        jLabel15.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel15.setText("Pendente");
+
+        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
+        jPanel14.setLayout(jPanel14Layout);
+        jPanel14Layout.setHorizontalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel14Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel14Layout.setVerticalGroup(
+            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel14Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel15)
+                .addContainerGap(24, Short.MAX_VALUE))
+        );
+
+        lblPendentes.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        lblPendentes.setText(":");
+
+        jLabel25.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel25.setText("Equipamentos pendentes");
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel13Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtQuantidadePorTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblPendentes, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel13Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(txtQuantidadePorTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(jPanel13Layout.createSequentialGroup()
+                .addComponent(jPanel14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(lblPendentes)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel25)
                 .addContainerGap())
         );
+
+        jPanel15.setBackground(new java.awt.Color(0, 204, 0));
+
+        lblAtivos.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        lblAtivos.setText(":");
+
+        jPanel16.setBackground(new java.awt.Color(0, 204, 102));
+
+        jLabel35.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel35.setText("Ativos");
+
+        javax.swing.GroupLayout jPanel16Layout = new javax.swing.GroupLayout(jPanel16);
+        jPanel16.setLayout(jPanel16Layout);
+        jPanel16Layout.setHorizontalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel35, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel16Layout.setVerticalGroup(
+            jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel16Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel35)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jLabel36.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel36.setText("Equipamentos instalados");
+
+        javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
+        jPanel15.setLayout(jPanel15Layout);
+        jPanel15Layout.setHorizontalGroup(
+            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel15Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblAtivos, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel36))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel15Layout.setVerticalGroup(
+            jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
+                .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblAtivos)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel36)
+                .addGap(12, 12, 12))
+        );
+
+        jPanel17.setBackground(new java.awt.Color(255, 204, 0));
+
+        lblReservas.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        lblReservas.setText(":");
+
+        jLabel33.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel33.setText("Reserva");
+
+        jLabel34.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel34.setText("Equipamentos reservas");
+
+        javax.swing.GroupLayout jPanel17Layout = new javax.swing.GroupLayout(jPanel17);
+        jPanel17.setLayout(jPanel17Layout);
+        jPanel17Layout.setHorizontalGroup(
+            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel17Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblReservas, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel33, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel34))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel17Layout.setVerticalGroup(
+            jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel17Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel33)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblReservas)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel34)
+                .addContainerGap())
+        );
+
+        txtQuantidadePorTipo.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        txtQuantidadePorTipo.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtQuantidadePorTipo.setEnabled(false);
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
@@ -1191,37 +1307,45 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel13)
                     .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(jLabel13)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1))
-                    .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, Short.MAX_VALUE)
+                            .addComponent(jPanel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(12, 12, 12)
-                        .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
-                        .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                            .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, 220, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtQuantidadePorTipo, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel13)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addGap(7, 7, 7)
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(txtQuantidadePorTipo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel6.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 940, 210));
+        jPanel6.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 940, 350));
 
         jTabbedPane2.addTab("Dashboard", jPanel6);
 
@@ -1291,6 +1415,14 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         });
         jPanel4.add(btnExcluirEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 10, 100, 30));
 
+        btnCancelar.setText("Cancelar");
+        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, -1, 30));
+
         txtDiretorioImagemEqui.setEditable(false);
         txtDiretorioImagemEqui.setBackground(new java.awt.Color(255, 255, 255));
         txtDiretorioImagemEqui.setFont(new java.awt.Font("Tahoma", 0, 3)); // NOI18N
@@ -1343,7 +1475,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Nº Etiqueta", "Filial", "Tipo", "Descrição", "Setor", "Funcionário", "Fornecedor", "Valor", "Data Entrada", "Data Saída", "Status", "Quantidade"
+                "Filial", "Nº Etiqueta", "Tipo", "Descrição", "Setor", "Funcionário", "Valor", "Quantidade", "Fornecedor", "Data Entrada", "Data Saída", "Status", "Marca", "Condição"
             }
         ));
         tblEquipamentos3.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -1424,7 +1556,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(bntBuscarEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1448,15 +1580,15 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         jLabel30.setText("Status");
         jPanel10.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(278, 124, 68, -1));
 
-        jLabel2.setText("Tipo");
+        jLabel2.setText("Tipo *");
         jPanel10.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 72, 50, -1));
 
-        jLabel5.setText("Setor");
+        jLabel5.setText("Setor *");
         jPanel10.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(278, 72, 50, -1));
         jPanel10.add(dtEntradaEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 95, 120, -1));
 
-        jLabel11.setText("Dt. de Entrada");
-        jPanel10.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 69, 90, -1));
+        jLabel11.setText("Dt. de Entrada *");
+        jPanel10.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 69, 110, -1));
 
         jLabel9.setText("Dt. de Saída");
         jPanel10.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 69, 90, -1));
@@ -1504,13 +1636,13 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         jLabel7.setText("Descrição");
         jPanel10.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(278, 14, -1, -1));
 
-        jLabel1.setText("Nº. Etiqueta");
+        jLabel1.setText("Nº. Etiqueta *");
         jPanel10.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 14, -1, -1));
 
         txtFuncionarioEqui.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         jPanel10.add(txtFuncionarioEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(573, 37, 150, -1));
 
-        jLabel6.setText("Funcionário");
+        jLabel6.setText("Funcionário *");
         jPanel10.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(573, 14, 80, -1));
 
         lblFotoPerfilEqui.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
@@ -1569,7 +1701,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
+                    .addGroup(jPanel9Layout.createSequentialGroup()
                         .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 942, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1580,16 +1712,15 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel9Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
                         .addGap(168, 168, 168)
-                        .addComponent(txtDiretorioImagemEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addComponent(txtDiretorioImagemEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -1603,18 +1734,18 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(4, 4, 4)
                 .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 970, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jTabbedPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
+                .addComponent(jTabbedPane2)
                 .addContainerGap())
         );
 
         getAccessibleContext().setAccessibleName("203 - Cadastro de Equipamento");
 
-        setBounds(0, 0, 1006, 689);
+        setBounds(0, 0, 1002, 770);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnInserirImagemEquiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInserirImagemEquiActionPerformed
@@ -1639,8 +1770,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnCadastrarEquiActionPerformed
 
     private void btnAtualizarEquiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtualizarEquiActionPerformed
-        // Chamando o metodo alterar
-        alterar_equipamento();
+        atualizarTotalEquipamentos();
     }//GEN-LAST:event_btnAtualizarEquiActionPerformed
 
     private void btnExcluirEquiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirEquiActionPerformed
@@ -1699,6 +1829,10 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnConsultarEquiActionPerformed
 
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCancelarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel ValorTotalEquipamentos;
@@ -1706,6 +1840,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnAlterarImagemEqui;
     private javax.swing.JButton btnAtualizarEqui;
     private javax.swing.JButton btnCadastrarEqui;
+    private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnConsultarEqui;
     private javax.swing.JButton btnExcluirEqui;
     private javax.swing.JButton btnExcluirImagemEqui;
@@ -1721,13 +1856,13 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JComboBox<String> cboTipoEqui;
     private com.toedter.calendar.JDateChooser dtEntradaEqui;
     private com.toedter.calendar.JDateChooser dtSaidaEqui;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
@@ -1741,11 +1876,16 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1757,6 +1897,10 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel17;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1770,8 +1914,11 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lblAtivos;
     private javax.swing.JLabel lblDevolvidos;
     private javax.swing.JLabel lblFotoPerfilEqui;
+    private javax.swing.JLabel lblPendentes;
+    private javax.swing.JLabel lblReservas;
     private javax.swing.JLabel lblTotalEquipamentos;
     private javax.swing.JLabel lblValorTotal;
     private javax.swing.JTable tblEquipamentos;

@@ -31,6 +31,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
      * Creates new form ScreenPrincipal
      */
     public ScreenPrincipal() {
+        
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             SwingUtilities.updateComponentTreeUI(this); // Garante que todos os componentes sejam atualizados
@@ -39,6 +40,14 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         }
         initComponents();
         conexao = ModuloConexao.conector();
+    }
+
+    //CRIAR REFERÊNCIA GLOBAL DO DASHBOARD
+    private ScreenDashboard dashboard;
+
+    //PERMITIR ACESSO AO DASHBOARD (IMPORTANTE)
+    public ScreenDashboard getDashboard() {
+        return dashboard;
     }
 
     /**
@@ -62,19 +71,30 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         Menu = new javax.swing.JMenuBar();
         MenuCadastro = new javax.swing.JMenu();
         MenuCadastroEmpresas = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         MenuCadastroOs = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         MenuCadastroUsuarios = new javax.swing.JMenuItem();
-        menuEquipamentos = new javax.swing.JMenuItem();
-        menuFilial = new javax.swing.JMenuItem();
-        menuSetores = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        menuEquipamentos = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        itmTIpo = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        menuFilial = new javax.swing.JMenuItem();
+        jSeparator5 = new javax.swing.JPopupMenu.Separator();
+        menuSetores = new javax.swing.JMenuItem();
+        jSeparator6 = new javax.swing.JPopupMenu.Separator();
+        jMenuItem2 = new javax.swing.JMenuItem();
         MenuRelatorio = new javax.swing.JMenu();
         menuRelatorioEmpresa = new javax.swing.JMenuItem();
+        jSeparator7 = new javax.swing.JPopupMenu.Separator();
         MenuRelatorioChamado = new javax.swing.JMenuItem();
-        MenuOpcoes = new javax.swing.JMenu();
-        MenuOpcoesSair = new javax.swing.JMenuItem();
         MenuAjuda = new javax.swing.JMenu();
         MenuAjudaSobre = new javax.swing.JMenuItem();
+        MenuOpcoes = new javax.swing.JMenu();
+        MenuOpcoesSair = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Mega Center - Sistema de Controle de Estoque");
@@ -100,7 +120,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         );
         DesktopLayout.setVerticalGroup(
             DesktopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 767, Short.MAX_VALUE)
+            .addGap(0, 769, Short.MAX_VALUE)
         );
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/logoMegaCenter.png"))); // NOI18N
@@ -157,7 +177,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 767, Short.MAX_VALUE)
+                        .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
@@ -198,6 +218,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuCadastro.add(MenuCadastroEmpresas);
+        MenuCadastro.add(jSeparator1);
 
         MenuCadastroOs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
         MenuCadastroOs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Chamado.png"))); // NOI18N
@@ -208,6 +229,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuCadastro.add(MenuCadastroOs);
+        MenuCadastro.add(jSeparator2);
 
         MenuCadastroUsuarios.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.event.InputEvent.ALT_MASK));
         MenuCadastroUsuarios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Cadastrar_usuario.png"))); // NOI18N
@@ -219,8 +241,8 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuCadastro.add(MenuCadastroUsuarios);
+        MenuCadastro.add(jSeparator3);
 
-        menuEquipamentos.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.ALT_MASK));
         menuEquipamentos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Equipamentos.png"))); // NOI18N
         menuEquipamentos.setText("Equipamentos");
         menuEquipamentos.addActionListener(new java.awt.event.ActionListener() {
@@ -228,7 +250,39 @@ public class ScreenPrincipal extends javax.swing.JFrame {
                 menuEquipamentosActionPerformed(evt);
             }
         });
+
+        jMenuItem3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/adicionar.png"))); // NOI18N
+        jMenuItem3.setText("Cadastrar");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        menuEquipamentos.add(jMenuItem3);
+
+        itmTIpo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.ALT_MASK));
+        itmTIpo.setText("Tipo de Equipamentos");
+        itmTIpo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                itmTIpoActionPerformed(evt);
+            }
+        });
+        menuEquipamentos.add(itmTIpo);
+
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.ALT_MASK));
+        jMenuItem1.setText("Lista de Equipamentos");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        menuEquipamentos.add(jMenuItem1);
+
+        jMenuItem4.setText("Histórico de Equipamentos");
+        menuEquipamentos.add(jMenuItem4);
+
         MenuCadastro.add(menuEquipamentos);
+        MenuCadastro.add(jSeparator4);
 
         menuFilial.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.ALT_MASK));
         menuFilial.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Filial.png"))); // NOI18N
@@ -239,6 +293,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuCadastro.add(menuFilial);
+        MenuCadastro.add(jSeparator5);
 
         menuSetores.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
         menuSetores.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Setores.png"))); // NOI18N
@@ -249,15 +304,15 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuCadastro.add(menuSetores);
+        MenuCadastro.add(jSeparator6);
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.ALT_MASK));
-        jMenuItem1.setText("Tipo de Equipamento");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        jMenuItem2.setText("Dashboard");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                jMenuItem2ActionPerformed(evt);
             }
         });
-        MenuCadastro.add(jMenuItem1);
+        MenuCadastro.add(jMenuItem2);
 
         Menu.add(MenuCadastro);
 
@@ -274,6 +329,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             }
         });
         MenuRelatorio.add(menuRelatorioEmpresa);
+        MenuRelatorio.add(jSeparator7);
 
         MenuRelatorioChamado.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
         MenuRelatorioChamado.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/RelatorioChamados.png"))); // NOI18N
@@ -286,21 +342,6 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuRelatorio.add(MenuRelatorioChamado);
 
         Menu.add(MenuRelatorio);
-
-        MenuOpcoes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Configuracao.png"))); // NOI18N
-        MenuOpcoes.setToolTipText("Opções");
-
-        MenuOpcoesSair.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
-        MenuOpcoesSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Sair.png"))); // NOI18N
-        MenuOpcoesSair.setText("Sair");
-        MenuOpcoesSair.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MenuOpcoesSairActionPerformed(evt);
-            }
-        });
-        MenuOpcoes.add(MenuOpcoesSair);
-
-        Menu.add(MenuOpcoes);
 
         MenuAjuda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Suporte.png"))); // NOI18N
         MenuAjuda.setToolTipText("Ajuda");
@@ -316,6 +357,21 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuAjuda.add(MenuAjudaSobre);
 
         Menu.add(MenuAjuda);
+
+        MenuOpcoes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Configuracao.png"))); // NOI18N
+        MenuOpcoes.setToolTipText("Opções");
+
+        MenuOpcoesSair.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
+        MenuOpcoesSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Sair.png"))); // NOI18N
+        MenuOpcoesSair.setText("Sair");
+        MenuOpcoesSair.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                MenuOpcoesSairActionPerformed(evt);
+            }
+        });
+        MenuOpcoes.add(MenuOpcoesSair);
+
+        Menu.add(MenuOpcoes);
 
         setJMenuBar(Menu);
 
@@ -400,13 +456,6 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         Desktop.add(filial);
     }//GEN-LAST:event_menuFilialActionPerformed
 
-    private void menuEquipamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEquipamentosActionPerformed
-        // Chamando a tela de equipamentos
-        ScreenEquipamentos equipamentos = new ScreenEquipamentos();
-        equipamentos.setVisible(true);
-        Desktop.add(equipamentos);
-    }//GEN-LAST:event_menuEquipamentosActionPerformed
-
     private void MenuCadastroUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuCadastroUsuariosActionPerformed
         // As linhas abaixo vai abrir a tela de cadastro de usuário dentro do painel desktop
         ScreenUsuarios usuario = new ScreenUsuarios();
@@ -436,12 +485,48 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         Desktop.add(filial);
     }//GEN-LAST:event_menuSetoresActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void menuEquipamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEquipamentosActionPerformed
+
+    }//GEN-LAST:event_menuEquipamentosActionPerformed
+
+    private void itmTIpoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_itmTIpoActionPerformed
         // TODO add your handling code here:
         ScreenTipoDeEquipamento filial = new ScreenTipoDeEquipamento();
         filial.setVisible(true);
         Desktop.add(filial);
+    }//GEN-LAST:event_itmTIpoActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // Chamando a tela de cadastro de Filial
+        ScreenEquipamentos equipamentos = new ScreenEquipamentos();
+        equipamentos.setVisible(true);
+        Desktop.add(equipamentos);
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // Se o dashboard ainda não existe ou foi fechado
+        if (dashboard == null || dashboard.isClosed()) {
+
+            dashboard = new ScreenDashboard();
+            Desktop.add(dashboard);
+            dashboard.setVisible(true);
+
+        } else {
+            // Se já estiver aberto, traz para frente
+            try {
+                dashboard.setIcon(false); // se estiver minimizado
+                dashboard.toFront();
+                dashboard.requestFocus();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -491,16 +576,27 @@ public class ScreenPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenuItem MenuOpcoesSair;
     public static javax.swing.JMenu MenuRelatorio;
     private javax.swing.JMenuItem MenuRelatorioChamado;
+    private javax.swing.JMenuItem itmTIpo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
+    private javax.swing.JPopupMenu.Separator jSeparator5;
+    private javax.swing.JPopupMenu.Separator jSeparator6;
+    private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JLabel lblData;
     private javax.swing.JLabel lblHora;
     public static javax.swing.JLabel lblUsuario;
-    private javax.swing.JMenuItem menuEquipamentos;
+    private javax.swing.JMenu menuEquipamentos;
     private javax.swing.JMenuItem menuFilial;
     private javax.swing.JMenuItem menuRelatorioEmpresa;
     private javax.swing.JMenuItem menuSetores;
