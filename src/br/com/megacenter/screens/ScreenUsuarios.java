@@ -12,7 +12,6 @@ package br.com.megacenter.screens;
 import javax.swing.GroupLayout;
 import java.sql.*;
 import br.com.megacenter.dal.ModuloConexao;
-import br.com.megacenter.utils.MaskFormatterUtil;
 import com.toedter.calendar.JDateChooser;
 import java.awt.Image;
 import java.io.File;
@@ -35,7 +34,6 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
     public ScreenUsuarios() {
         initComponents();
         conexao = ModuloConexao.conector();
-        aplicarMascaras();
 
         txtCepUsu.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
@@ -436,21 +434,6 @@ public class ScreenUsuarios extends javax.swing.JInternalFrame {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
-        }
-    }
-
-    private void aplicarMascaras() {
-        try {
-
-            aplicarMascaraSeguro(txtTelefoneUsu, MaskFormatterUtil::applyPhoneMask);
-            aplicarMascaraSeguro(txtCelularUsu, MaskFormatterUtil::applyPhoneMask);
-            aplicarMascaraSeguro(txtCepUsu, MaskFormatterUtil::applyCepMask);
-            aplicarMascaraSeguro(txtCpfUsu, MaskFormatterUtil::applyCpfMask);
-            aplicarMascaraSeguro(txtDataNascimentoUsu, MaskFormatterUtil::applyDateMask);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "Erro ao aplicar máscaras: " + e.getMessage());
         }
     }
 

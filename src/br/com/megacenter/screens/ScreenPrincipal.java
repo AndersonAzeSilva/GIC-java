@@ -5,7 +5,11 @@
  */
 package br.com.megacenter.screens;
 
+import br.com.megacenter.screens.components.ScreenFilial;
+import br.com.megacenter.screens.components.ScreenSetores;
+import br.com.megacenter.screens.components.ScreenTipoDeEquipamento;
 import br.com.megacenter.dal.ModuloConexao;
+import br.com.megacenter.screens.components.ScreenStatus;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
@@ -31,7 +35,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
      * Creates new form ScreenPrincipal
      */
     public ScreenPrincipal() {
-        
+
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
             SwingUtilities.updateComponentTreeUI(this); // Garante que todos os componentes sejam atualizados
@@ -86,11 +90,13 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         jSeparator5 = new javax.swing.JPopupMenu.Separator();
         menuSetores = new javax.swing.JMenuItem();
         jSeparator6 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem2 = new javax.swing.JMenuItem();
+        menuStatus = new javax.swing.JMenuItem();
         MenuRelatorio = new javax.swing.JMenu();
         menuRelatorioEmpresa = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
         MenuRelatorioChamado = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
         MenuAjuda = new javax.swing.JMenu();
         MenuAjudaSobre = new javax.swing.JMenuItem();
         MenuOpcoes = new javax.swing.JMenu();
@@ -120,7 +126,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         );
         DesktopLayout.setVerticalGroup(
             DesktopLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 769, Short.MAX_VALUE)
+            .addGap(0, 836, Short.MAX_VALUE)
         );
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/logoMegaCenter.png"))); // NOI18N
@@ -165,9 +171,9 @@ public class ScreenPrincipal extends javax.swing.JFrame {
                 .addComponent(lblData, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblHora)
-                .addContainerGap(968, Short.MAX_VALUE))
+                .addContainerGap(1198, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 1074, Short.MAX_VALUE)
+                .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 1304, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel1)
                 .addContainerGap())
@@ -177,7 +183,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
+                        .addComponent(Desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 836, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
@@ -279,6 +285,11 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         menuEquipamentos.add(jMenuItem1);
 
         jMenuItem4.setText("Histórico de Equipamentos");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
         menuEquipamentos.add(jMenuItem4);
 
         MenuCadastro.add(menuEquipamentos);
@@ -306,13 +317,14 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuCadastro.add(menuSetores);
         MenuCadastro.add(jSeparator6);
 
-        jMenuItem2.setText("Dashboard");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+        menuStatus.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.ALT_MASK));
+        menuStatus.setText("Status");
+        menuStatus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem2ActionPerformed(evt);
+                menuStatusActionPerformed(evt);
             }
         });
-        MenuCadastro.add(jMenuItem2);
+        MenuCadastro.add(menuStatus);
 
         Menu.add(MenuCadastro);
 
@@ -342,6 +354,25 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         MenuRelatorio.add(MenuRelatorioChamado);
 
         Menu.add(MenuRelatorio);
+
+        jMenu1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_MenuDashboard.png"))); // NOI18N
+        jMenu1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu1ActionPerformed(evt);
+            }
+        });
+
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.ALT_MASK));
+        jMenuItem2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Dashboard.png"))); // NOI18N
+        jMenuItem2.setText("Dashboard");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
+
+        Menu.add(jMenu1);
 
         MenuAjuda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Suporte.png"))); // NOI18N
         MenuAjuda.setToolTipText("Ajuda");
@@ -375,7 +406,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
 
         setJMenuBar(Menu);
 
-        setSize(new java.awt.Dimension(1287, 883));
+        setSize(new java.awt.Dimension(1517, 952));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -507,6 +538,10 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu1ActionPerformed
+
+    }//GEN-LAST:event_jMenu1ActionPerformed
+
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         // Se o dashboard ainda não existe ou foi fechado
         if (dashboard == null || dashboard.isClosed()) {
@@ -525,8 +560,21 @@ public class ScreenPrincipal extends javax.swing.JFrame {
                 e.printStackTrace();
             }
         }
-
     }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void menuStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuStatusActionPerformed
+        // Chamando a tela de cadastro de Filial
+        ScreenStatus status = new ScreenStatus();
+        status.setVisible(true);
+        Desktop.add(status);
+    }//GEN-LAST:event_menuStatusActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        // Chamando a tela de cadastro de Filial
+        ScreenImportarPlanilhaEquipamentos historico = new ScreenImportarPlanilhaEquipamentos();
+        historico.setVisible(true);
+        Desktop.add(historico);
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -581,6 +629,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
@@ -600,5 +649,6 @@ public class ScreenPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenuItem menuFilial;
     private javax.swing.JMenuItem menuRelatorioEmpresa;
     private javax.swing.JMenuItem menuSetores;
+    private javax.swing.JMenuItem menuStatus;
     // End of variables declaration//GEN-END:variables
 }

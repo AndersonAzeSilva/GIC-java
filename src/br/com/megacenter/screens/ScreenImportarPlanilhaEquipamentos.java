@@ -1,0 +1,447 @@
+package br.com.megacenter.screens;
+
+import br.com.megacenter.dto.EquipamentoImportacaoDTO;
+import br.com.megacenter.services.HistoricoEquipamentoService;
+import br.com.megacenter.services.ImportacaoExcelService;
+import br.com.megacenter.dal.ModuloConexao;
+import java.io.File;
+import java.sql.*;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+
+public class ScreenImportarPlanilhaEquipamentos extends javax.swing.JInternalFrame {
+
+    private List<EquipamentoImportacaoDTO> dadosImportados;
+
+    public ScreenImportarPlanilhaEquipamentos() {
+        initComponents();
+    }
+
+    // =========================
+    // IMPORTAR (PREVIEW)
+    // =========================
+    private void importarExcel() {
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(
+                new FileNameExtensionFilter("Planilha Excel (*.xlsx)", "xlsx")
+        );
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            try {
+                dadosImportados = ImportacaoExcelService.lerExcel(
+                        chooser.getSelectedFile()
+                );
+
+                DefaultTableModel model = new DefaultTableModel();
+                model.setColumnIdentifiers(new String[]{
+                    "Etiqueta", "Filial", "Tipo", "Descrição", "Setor", "Usuário",
+                    "Valor", "Qtd", "Empresa", "Entrada", "Saída",
+                    "Status", "Marca", "Condições"
+                });
+
+                for (EquipamentoImportacaoDTO e : dadosImportados) {
+                    model.addRow(new Object[]{
+                        e.etiqueta, e.filial, e.tipo, e.descricao,
+                        e.setor, e.funcionario, e.valor, e.quantidade,
+                        e.empresa, e.dataEntrada, e.dataSaida,
+                        e.status, e.marca, e.condicoes
+                    });
+                }
+
+                tblHistoricoDeEqui.setModel(model);
+
+                JOptionPane.showMessageDialog(this,
+                        "Planilha carregada. Confira os dados antes de salvar.");
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        "Erro ao importar Excel:\n" + e.getMessage());
+            }
+        }
+    }
+
+    // =========================
+    // SALVAR NO BANCO
+    // =========================
+    private void salvarImportacao() {
+
+        if (dadosImportados == null || dadosImportados.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nenhum dado para salvar.");
+            return;
+        }
+
+        try (Connection conexao = ModuloConexao.conector()) {
+
+            String sql = "INSERT INTO equipamentos("
+                    + "etiqueta_equipamento, codigo_filial, tipo, descricao, setor, funcionario,"
+                    + "valor, quantidade, codigo_empresa, data_cadastrado, data_saida,"
+                    + "status, marca, condicoes_equipamento)"
+                    + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+            PreparedStatement pst = conexao.prepareStatement(
+                    sql, Statement.RETURN_GENERATED_KEYS
+            );
+
+            for (EquipamentoImportacaoDTO e : dadosImportados) {
+
+                pst.setObject(1, e.etiqueta);
+                pst.setObject(2, e.filial);
+                pst.setString(3, e.tipo);
+                pst.setString(4, e.descricao);
+                pst.setString(5, e.setor);
+                pst.setString(6, e.funcionario);
+                pst.setString(7, e.valor);
+                pst.setString(8, e.quantidade);
+                pst.setString(9, e.empresa);
+                pst.setTimestamp(10, e.dataEntrada);
+                pst.setTimestamp(11, e.dataSaida);
+                pst.setString(12, e.status);
+                pst.setString(13, e.marca);
+                pst.setString(14, e.condicoes);
+
+                pst.executeUpdate();
+
+                ResultSet rs = pst.getGeneratedKeys();
+                if (rs.next()) {
+                    HistoricoEquipamentoService.registrarHistoricoImportacao(
+                            conexao,
+                            rs.getInt(1),
+                            lblUsuarioLogado.getText()
+                    );
+                }
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    "Importação salva com sucesso!");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao salvar:\n" + e.getMessage());
+        }
+    }
+
+    // =====================================================
+    // ESTILO TIMELINE
+    // =====================================================
+    private void estilizarTimeline() {
+
+        tblHistoricoDeEqui.setRowHeight(30);
+
+        // Futuro:
+        // Renderer por tipo de ação:
+        // IMPORTAÇÃO, CADASTRO, DEVOLUÇÃO, ALTERAÇÃO, etc.
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtPesquisaHistoricoEqui = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblHistoricoDeEqui = new javax.swing.JTable();
+        txtFiltroHistoricoEqui = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        cboFiltroHistoricoTipoEqui = new javax.swing.JComboBox();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        cboFiltroHistoricoUsuarioEqui = new javax.swing.JComboBox();
+        bntBuscarHistoricoEqui = new javax.swing.JButton();
+        dtSaidaHistoricoEqui = new com.toedter.calendar.JDateChooser();
+        dtEntradaHistoricoEqui = new com.toedter.calendar.JDateChooser();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        cboFiltroHistoricoFilialEqui = new javax.swing.JComboBox();
+        btnImportarExcel = new javax.swing.JButton();
+        lblUsuarioLogado = new javax.swing.JLabel();
+        btnSalvarImportacao = new javax.swing.JButton();
+        btnLimparPreview = new javax.swing.JButton();
+
+        setBackground(new java.awt.Color(255, 255, 255));
+        setClosable(true);
+        setIconifiable(true);
+        setMaximizable(true);
+        setTitle("G&C - Importar Planilha de Equipamentos");
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Registro de importação"));
+
+        jLabel1.setText("Equipamento");
+
+        jLabel2.setText("Filial");
+
+        tblHistoricoDeEqui.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Nº Etiqueta", "Filial", "Tipo", "Descrição", "Setor", "Usuário", "Valor", "Quantidade", "Fornecedor", "Data Entrada", "Data Saída", "Status", "Marca", "Condição"
+            }
+        ));
+        tblHistoricoDeEqui.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblHistoricoDeEquiMouseClicked(evt);
+            }
+        });
+        jScrollPane4.setViewportView(tblHistoricoDeEqui);
+
+        txtFiltroHistoricoEqui.setBackground(new java.awt.Color(255, 255, 204));
+        txtFiltroHistoricoEqui.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFiltroHistoricoEquiKeyReleased(evt);
+            }
+        });
+
+        jLabel16.setText("Descrição");
+
+        cboFiltroHistoricoTipoEqui.setBackground(new java.awt.Color(255, 255, 204));
+        cboFiltroHistoricoTipoEqui.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " " }));
+
+        jLabel21.setText("Tipo");
+
+        jLabel22.setText("Usuário");
+
+        cboFiltroHistoricoUsuarioEqui.setBackground(new java.awt.Color(255, 255, 204));
+        cboFiltroHistoricoUsuarioEqui.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", " " }));
+
+        bntBuscarHistoricoEqui.setBackground(new java.awt.Color(255, 255, 204));
+        bntBuscarHistoricoEqui.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        bntBuscarHistoricoEqui.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/Icon_Pesquisa.png"))); // NOI18N
+        bntBuscarHistoricoEqui.setText("Buscar");
+        bntBuscarHistoricoEqui.setPreferredSize(new java.awt.Dimension(69, 25));
+        bntBuscarHistoricoEqui.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bntBuscarHistoricoEquiActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setText("Dt. de Entrada");
+
+        jLabel9.setText("Dt. de Saída");
+
+        cboFiltroHistoricoFilialEqui.setBackground(new java.awt.Color(255, 255, 204));
+        cboFiltroHistoricoFilialEqui.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " " }));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtPesquisaHistoricoEqui, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addGap(50, 50, 50))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(cboFiltroHistoricoFilialEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFiltroHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cboFiltroHistoricoTipoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cboFiltroHistoricoUsuarioEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dtEntradaHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dtSaidaHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(bntBuscarHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPesquisaHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel16)
+                        .addGap(7, 7, 7)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtFiltroHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cboFiltroHistoricoFilialEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel21)
+                        .addGap(7, 7, 7)
+                        .addComponent(cboFiltroHistoricoTipoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel22)
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(cboFiltroHistoricoUsuarioEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(bntBuscarHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addGap(10, 10, 10)
+                        .addComponent(dtEntradaHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addGap(10, 10, 10)
+                        .addComponent(dtSaidaHistoricoEqui, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 448, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        btnImportarExcel.setText("Importar Execel");
+        btnImportarExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportarExcelActionPerformed(evt);
+            }
+        });
+
+        lblUsuarioLogado.setText("Usuário");
+
+        btnSalvarImportacao.setText("Salvar Importação");
+        btnSalvarImportacao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvarImportacaoActionPerformed(evt);
+            }
+        });
+
+        btnLimparPreview.setText("Limpar Campos");
+        btnLimparPreview.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimparPreviewActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnLimparPreview)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnSalvarImportacao)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblUsuarioLogado)
+                            .addComponent(btnImportarExcel))))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addComponent(lblUsuarioLogado)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnImportarExcel)
+                    .addComponent(btnSalvarImportacao)
+                    .addComponent(btnLimparPreview))
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void tblHistoricoDeEquiMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblHistoricoDeEquiMouseClicked
+        // chamando o metodo preencher campos
+        //exibir_campos();
+    }//GEN-LAST:event_tblHistoricoDeEquiMouseClicked
+
+    private void txtFiltroHistoricoEquiKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFiltroHistoricoEquiKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFiltroHistoricoEquiKeyReleased
+
+    private void bntBuscarHistoricoEquiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntBuscarHistoricoEquiActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bntBuscarHistoricoEquiActionPerformed
+
+    private void btnImportarExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportarExcelActionPerformed
+        // método que já criamos
+        importarExcel();
+    }//GEN-LAST:event_btnImportarExcelActionPerformed
+
+    private void btnSalvarImportacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarImportacaoActionPerformed
+        // TODO add your handling code here:
+        int confirmacao = JOptionPane.showConfirmDialog(
+                this,
+                "Deseja salvar os dados importados no banco?",
+                "Confirmação",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirmacao == JOptionPane.YES_OPTION) {
+            salvarImportacao();
+        }
+    }//GEN-LAST:event_btnSalvarImportacaoActionPerformed
+
+    private void btnLimparPreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimparPreviewActionPerformed
+        // TODO add your handling code here:
+        dadosImportados = null;
+
+        ((javax.swing.table.DefaultTableModel) tblHistoricoDeEqui.getModel())
+                .setRowCount(0);
+
+        JOptionPane.showMessageDialog(this,
+                "Pré-visualização limpa.");
+    }//GEN-LAST:event_btnLimparPreviewActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bntBuscarHistoricoEqui;
+    private javax.swing.JButton btnImportarExcel;
+    private javax.swing.JButton btnLimparPreview;
+    private javax.swing.JButton btnSalvarImportacao;
+    private javax.swing.JComboBox cboFiltroHistoricoFilialEqui;
+    private javax.swing.JComboBox cboFiltroHistoricoTipoEqui;
+    private javax.swing.JComboBox cboFiltroHistoricoUsuarioEqui;
+    private com.toedter.calendar.JDateChooser dtEntradaHistoricoEqui;
+    private com.toedter.calendar.JDateChooser dtSaidaHistoricoEqui;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JLabel lblUsuarioLogado;
+    private javax.swing.JTable tblHistoricoDeEqui;
+    private javax.swing.JTextField txtFiltroHistoricoEqui;
+    private javax.swing.JTextField txtPesquisaHistoricoEqui;
+    // End of variables declaration//GEN-END:variables
+}

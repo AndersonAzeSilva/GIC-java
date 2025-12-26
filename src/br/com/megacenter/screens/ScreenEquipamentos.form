@@ -1053,7 +1053,7 @@
                   </Properties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                      <AbsoluteConstraints x="220" y="10" width="-1" height="-1"/>
+                      <AbsoluteConstraints x="211" y="10" width="70" height="-1"/>
                     </Constraint>
                   </Constraints>
                 </Component>
@@ -1446,11 +1446,7 @@
                 <Component class="javax.swing.JComboBox" name="cboStatusEqui">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="3">
-                        <StringItem index="0" value="Ativo"/>
-                        <StringItem index="1" value="Reserva"/>
-                        <StringItem index="2" value="Devolvido"/>
-                      </StringArray>
+                      <StringArray count="0"/>
                     </Property>
                   </Properties>
                   <Constraints>

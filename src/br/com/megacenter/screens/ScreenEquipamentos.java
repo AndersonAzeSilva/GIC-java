@@ -61,11 +61,17 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         conexao = ModuloConexao.conector();
         atualizarTotalEquipamentos();
         exibir_todos_equipamentos_dashboard();
-        carregarEmpresasNoCombo();// chamando o metodo carregar empresas
+  
         carregarFilialNoCombo();
         carregarFiltroFilialNoCombo();
         carregarFiltroTipolNoCombo();
+        carregarFiltroUsuariosNoCombo();
+        
+        // carregando os dados de cada combobox direto do banco de dados
         carregarSetoresNoCombo();
+        carregarStatuslNoCombo();
+        carregarTipoNoCombo();
+        carregarEmpresasNoCombo();// chamando o metodo carregar empresas
 
         sorter = new TableRowSorter<>(tblEquipamentos.getModel());
         tblEquipamentos.setRowSorter(sorter);
@@ -161,7 +167,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             ScreenDashboard dashboard = principal.getDashboard();
 
             if (dashboard != null && !dashboard.isClosed()) {
-                dashboard.atualizarDashboardCompleto();
+                //dashboard.atualizarDashboardCompleto();
             }
         }
     }
@@ -517,7 +523,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
                 ScreenDashboard dashboard = principal.getDashboard();
 
                 if (dashboard != null && !dashboard.isClosed()) {
-                    dashboard.atualizarDashboardCompleto();
+                    //dashboard.atualizarDashboardCompleto();
                 }
             }
 
@@ -836,6 +842,27 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Erro ao carregar empresas: " + e.getMessage());
         }
     }
+    
+    // criando o metodo para carregar os setores no combobox setor
+    private void carregarTipoNoCombo() {
+        String sql = "SELECT descricao FROM tipo ORDER BY descricao ASC";
+
+        try {
+            pst = conexao.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            cboTipoEqui.removeAllItems(); // Limpa opções atuais
+            cboTipoEqui.addItem("Selecione"); // opção padrão
+
+            while (rs.next()) {
+                String descricaoSetor = rs.getString("descricao");
+                cboTipoEqui.addItem(descricaoSetor);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar os tipos de equipamento: " + e.getMessage());
+        }
+    }
 
     // criando o metodo para carregar as filias no combobox de filial na tela de cadastro de equipamentos
     private void carregarFilialNoCombo() {
@@ -847,7 +874,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             rs = pst.executeQuery();
 
             cboFilialEqui.removeAllItems();     // Limpa o ComboBox
-            cboFilialEqui.addItem(""); // Opção padrão
+            cboFilialEqui.addItem("Selecione"); // Opção padrão
 
             while (rs.next()) {
                 cboFilialEqui.addItem(rs.getString("codigo_filial"));
@@ -873,7 +900,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             rs = pst.executeQuery();
 
             cboFiltroFilialEqui.removeAllItems();     // Limpa o ComboBox
-            cboFiltroFilialEqui.addItem(""); // Opção padrão
+            cboFiltroFilialEqui.addItem("Selecione"); // Opção padrão
 
             while (rs.next()) {
                 cboFiltroFilialEqui.addItem(rs.getString("codigo_filial"));
@@ -899,7 +926,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             rs = pst.executeQuery();
 
             cboFiltroTipoEqui.removeAllItems(); // Limpa o ComboBox
-            cboFiltroTipoEqui.addItem(""); // Opção padrão
+            cboFiltroTipoEqui.addItem("Selecione"); // Opção padrão
 
             while (rs.next()) {
                 cboFiltroTipoEqui.addItem(rs.getString("descricao"));
@@ -914,24 +941,54 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
             );
         }
     }
+    
+    // criando o metodo para carregar as filias do filtro no combobox de filial
+    private void carregarFiltroUsuariosNoCombo() {
 
-    /**
-     * Controla o estado dos botões conforme o contexto
-     */
-    private void gerenciarBotoes(
-            boolean novo,
-            boolean salvar,
-            boolean alterar,
-            boolean excluir,
-            boolean alterarImagem
-    ) {
-        btnNovo.setEnabled(novo);
-        btnSalvarEqui.setEnabled(salvar);
-        btnAtualizarEqui.setEnabled(alterar);
-        btnExcluirEqui.setEnabled(excluir);
-        btnAlterarImagemEqui.setEnabled(alterarImagem);
+        String sql = "SELECT usuario FROM usuarios ORDER BY usuario ASC";
+
+        try {
+            pst = conexao.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            cboFiltroUsuarioEqui.removeAllItems(); // Limpa o ComboBox
+            cboFiltroUsuarioEqui.addItem("Selecione"); // Opção padrão
+
+            while (rs.next()) {
+                cboFiltroUsuarioEqui.addItem(rs.getString("usuario"));
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao carregar os usuários.\n" + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
+    
+     // criando o metodo para carregar as filias do filtro no combobox de filial
+    private void carregarStatuslNoCombo() {
 
+        String sql = "SELECT descricao FROM status ORDER BY descricao ASC";
+
+        try {
+            pst = conexao.prepareStatement(sql);
+            rs = pst.executeQuery();
+
+            cboStatusEqui.removeAllItems(); // Limpa opções atuais
+            cboStatusEqui.addItem("Selecione"); // opção padrão
+
+            while (rs.next()) {
+                String descricaoSetor = rs.getString("descricao");
+                cboStatusEqui.addItem(descricaoSetor);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar todos os status: " + e.getMessage());
+        }
+    }
     // limpar campos e habilitar os botões e gerenciar os botões
     private void limpar_campos() {
         // limpando os campos
@@ -958,15 +1015,6 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
 
         // Limpa tabela
         ((DefaultTableModel) tblEquipamentos.getModel()).setRowCount(0);
-
-        // Volta para modo "Novo Cadastro"
-        gerenciarBotoes(
-                true, // novo
-                true, // salvar
-                false, // alterar
-                false, // excluir
-                false // alterar imagem
-        );
     }
 
     /**
@@ -1511,7 +1559,7 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         jPanel4.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 10, -1, 30));
 
         btnNovo.setText("Novo");
-        jPanel4.add(btnNovo, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 10, -1, -1));
+        jPanel4.add(btnNovo, new org.netbeans.lib.awtextra.AbsoluteConstraints(211, 10, 70, -1));
 
         txtDiretorioImagemEqui.setEditable(false);
         txtDiretorioImagemEqui.setBackground(new java.awt.Color(255, 255, 255));
@@ -1659,7 +1707,6 @@ public class ScreenEquipamentos extends javax.swing.JInternalFrame {
         cboTipoEqui.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "Adaptador", "Desktop", "Monitor", "Leitor", "Mouse", "Teclado" }));
         jPanel10.add(cboTipoEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 95, 146, -1));
 
-        cboStatusEqui.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ativo", "Reserva", "Devolvido" }));
         jPanel10.add(cboStatusEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(278, 147, 135, -1));
 
         jPanel10.add(cboFornecedorEqui, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 147, 146, -1));
