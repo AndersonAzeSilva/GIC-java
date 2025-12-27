@@ -7,32 +7,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
-/**
- * ===================================================== SERVIÇO DE LEITURA DE
- * EXCEL (LEGADO / COMPATIBILIDADE)
- * =====================================================
- *
- * ✔ Usa leitura por CABEÇALHO (não por índice fixo) ✔ Compatível com planilhas
- * fora de ordem ✔ Não grava no banco (apenas preview) ✔ Alinhado com
- * ImportacaoExcelService
- *
- * OBS: Este service existe para manter compatibilidade com chamadas antigas do
- * projeto.
- */
 public class ImportacaoExcelLeituraService {
 
     public static List<EquipamentoImportacaoDTO> lerExcel(File arquivo) throws Exception {
-
-        if (arquivo == null || !arquivo.getName().toLowerCase().endsWith(".xlsx")) {
-            throw new Exception("Arquivo inválido. Utilize uma planilha .xlsx");
-        }
 
         List<EquipamentoImportacaoDTO> lista = new ArrayList<>();
 
@@ -41,7 +22,7 @@ public class ImportacaoExcelLeituraService {
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            // ✔ valida cabeçalho mínimo (Etiqueta, Filial)
+            // valida cabeçalho mínimo
             ExcelUtils.validarColunas(sheet);
 
             Row header = sheet.getRow(0);
@@ -54,33 +35,33 @@ public class ImportacaoExcelLeituraService {
                     continue;
                 }
 
+                // ignora linha totalmente vazia (Etiqueta e Filial vazias)
+                String etiquetaTxt = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Etiqueta"));
+                String filialTxt = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Filial"));
+                if (etiquetaTxt.isEmpty() && filialTxt.isEmpty()) {
+                    continue;
+                }
+
                 EquipamentoImportacaoDTO e = new EquipamentoImportacaoDTO();
 
+                // alinhado ao banco (equipamentos)
                 e.etiqueta = parseInt(ExcelUtils.getCellByHeader(row, headerMap, "Etiqueta"));
                 e.filial = parseInt(ExcelUtils.getCellByHeader(row, headerMap, "Filial"));
-
                 e.tipo = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Tipo"));
                 e.descricao = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Descrição"));
                 e.setor = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Setor"));
-                e.funcionario = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Usuário"));
-
+                e.funcionario = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Usuário")); // planilha usa "Usuário"
                 e.valor = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Valor"));
                 e.quantidade = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Quantidade"));
                 e.empresa = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Empresa"));
 
+                // datas (planilha: "Data da Entrada", "Data da Saída")
                 e.dataEntrada = parseDate(ExcelUtils.getCellByHeader(row, headerMap, "Data da Entrada"));
                 e.dataSaida = parseDate(ExcelUtils.getCellByHeader(row, headerMap, "Data da Saída"));
 
                 e.status = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Status"));
                 e.marca = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Marca"));
-                e.condicoes = ExcelUtils.getCellValue(
-                        ExcelUtils.getCellByHeader(row, headerMap, "Condições_equipamento")
-                );
-
-                // ignora linha totalmente vazia
-                if (linhaVazia(e)) {
-                    continue;
-                }
+                e.condicoes = ExcelUtils.getCellValue(ExcelUtils.getCellByHeader(row, headerMap, "Condições_equipamento"));
 
                 lista.add(e);
             }
@@ -89,50 +70,27 @@ public class ImportacaoExcelLeituraService {
         return lista;
     }
 
-    // =====================================================
+    // =======================
     // AUXILIARES
-    // =====================================================
-    private static boolean linhaVazia(EquipamentoImportacaoDTO e) {
-        return e.etiqueta == null
-                && e.filial == null
-                && isEmpty(e.tipo)
-                && isEmpty(e.descricao)
-                && isEmpty(e.setor)
-                && isEmpty(e.funcionario)
-                && isEmpty(e.valor)
-                && isEmpty(e.quantidade)
-                && isEmpty(e.empresa)
-                && e.dataEntrada == null
-                && e.dataSaida == null
-                && isEmpty(e.status)
-                && isEmpty(e.marca)
-                && isEmpty(e.condicoes);
-    }
-
-    private static boolean isEmpty(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-
-    private static Integer parseInt(Cell cell) throws Exception {
+    // =======================
+    private static Integer parseInt(Cell cell) {
         String v = ExcelUtils.getCellValue(cell);
         if (v.isEmpty()) {
             return null;
         }
-
         try {
             return Integer.parseInt(v.trim());
-        } catch (NumberFormatException ex) {
-            throw new Exception("Valor inteiro inválido: '" + v + "'");
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
     private static Timestamp parseDate(Cell cell) throws Exception {
-
         if (cell == null) {
             return null;
         }
 
-        // Data nativa do Excel
+        // Data real do Excel
         if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
             return new Timestamp(cell.getDateCellValue().getTime());
         }
@@ -145,7 +103,6 @@ public class ImportacaoExcelLeituraService {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setLenient(false);
-
-        return new Timestamp(sdf.parse(txt.trim()).getTime());
+        return new Timestamp(sdf.parse(txt).getTime());
     }
 }

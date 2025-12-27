@@ -95,8 +95,8 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jLabel22" alignment="0" min="-2" pref="101" max="-2" attributes="0"/>
-                              <Component id="cboFiltroHistoricoUsuarioEqui" alignment="0" min="-2" pref="130" max="-2" attributes="0"/>
+                              <Component id="cboFiltroHistoricoUsuarioEqui" min="-2" pref="130" max="-2" attributes="0"/>
+                              <Component id="lblUsuarioLogado" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -113,13 +113,11 @@
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="lblUsuarioLogado" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="btnLimparPreview" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="btnLimparPreview" min="-2" pref="170" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnSalvarImportacao" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="btnImportarExcel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="btnImportarExcel" min="-2" pref="170" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -153,8 +151,8 @@
                           <Component id="cboFiltroHistoricoTipoEqui" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" attributes="0">
-                          <Component id="jLabel22" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="6" pref="6" max="-2" attributes="0"/>
+                          <Component id="lblUsuarioLogado" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="cboFiltroHistoricoUsuarioEqui" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="bntBuscarHistoricoEqui" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -172,13 +170,12 @@
                       </Group>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="jScrollPane4" pref="192" max="32767" attributes="0"/>
+                  <Component id="jScrollPane4" pref="188" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="btnImportarExcel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnSalvarImportacao" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnLimparPreview" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="lblUsuarioLogado" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="jScrollPane1" min="-2" pref="266" max="-2" attributes="0"/>
@@ -343,11 +340,6 @@
             <Property name="text" type="java.lang.String" value="Tipo"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel22">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Usu&#xe1;rio"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JComboBox" name="cboFiltroHistoricoUsuarioEqui">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -493,7 +485,10 @@
         </Container>
         <Component class="javax.swing.JButton" name="btnLimparPreview">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Limpar Campos"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_clear.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Limpar"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLimparPreviewActionPerformed"/>
@@ -501,6 +496,9 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnSalvarImportacao">
           <Properties>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_save_database.png"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="Salvar Importa&#xe7;&#xe3;o"/>
           </Properties>
           <Events>
@@ -509,7 +507,10 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnImportarExcel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Importar Execel"/>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_import_excel.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Importar Excel"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnImportarExcelActionPerformed"/>

@@ -5,35 +5,50 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+/**
+ * Renderer para destacar importações com inválidas.
+ * colunaInvalidas: índice da coluna "Inválidas" no JTable.
+ */
 public class ImportacaoStatusRenderer extends DefaultTableCellRenderer {
 
-    private final int colInvalidas;
+    private final int colunaInvalidas;
 
-    public ImportacaoStatusRenderer(int colInvalidas) {
-        this.colInvalidas = colInvalidas;
+    public ImportacaoStatusRenderer(int colunaInvalidas) {
+        this.colunaInvalidas = colunaInvalidas;
+        setOpaque(true);
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(
+            JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        if (isSelected) return c;
-
         int invalidas = 0;
-        try {
-            Object val = table.getValueAt(row, colInvalidas);
-            if (val != null) invalidas = Integer.parseInt(val.toString());
-        } catch (Exception ignored) {}
 
-        if (invalidas > 0) {
-            c.setBackground(new Color(255, 235, 235));
-        } else {
-            c.setBackground(Color.WHITE);
+        try {
+            Object invObj = table.getValueAt(row, colunaInvalidas);
+            if (invObj != null) {
+                String s = invObj.toString().trim();
+                if (!s.isEmpty()) invalidas = Integer.parseInt(s);
+            }
+        } catch (Exception ignored) {
         }
 
-        c.setForeground(Color.BLACK);
+        if (isSelected) {
+            // seleção padrão
+            return c;
+        }
+
+        // Linhas com inválidas: fundo suave avermelhado
+        if (invalidas > 0) {
+            c.setBackground(new Color(255, 235, 235));
+            c.setForeground(Color.BLACK);
+        } else {
+            c.setBackground(Color.WHITE);
+            c.setForeground(Color.BLACK);
+        }
+
         return c;
     }
 }

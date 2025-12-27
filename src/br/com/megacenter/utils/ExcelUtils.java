@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.*;
 
 public class ExcelUtils {
 
-    // ✅ mínimo exigido pra aceitar a planilha
+    // Mínimo exigido pra aceitar a planilha
     public static final List<String> COLUNAS_OBRIGATORIAS = Arrays.asList(
         "Etiqueta", "Filial"
     );
