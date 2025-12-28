@@ -285,6 +285,7 @@ public class ScreenPrincipal extends javax.swing.JFrame {
         menuEquipamentos.add(jMenuItem1);
 
         jMenuItem4.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.ALT_MASK));
+        jMenuItem4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/importacao/icon_menu_import.png"))); // NOI18N
         jMenuItem4.setText("Importar Planilha");
         jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

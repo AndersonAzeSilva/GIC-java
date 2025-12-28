@@ -597,6 +597,7 @@ public class ScreenImportarPlanilhaEquipamentos extends javax.swing.JInternalFra
 
         btnLimparPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/importacao/icon_clear.png"))); // NOI18N
         btnLimparPreview.setText("Limpar");
+        btnLimparPreview.setToolTipText("Limpar");
         btnLimparPreview.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLimparPreviewActionPerformed(evt);
@@ -605,6 +606,7 @@ public class ScreenImportarPlanilhaEquipamentos extends javax.swing.JInternalFra
 
         btnSalvarImportacao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/importacao/icon_save_database.png"))); // NOI18N
         btnSalvarImportacao.setText("Salvar Importação");
+        btnSalvarImportacao.setToolTipText("Salvar Importação");
         btnSalvarImportacao.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSalvarImportacaoActionPerformed(evt);
@@ -613,6 +615,7 @@ public class ScreenImportarPlanilhaEquipamentos extends javax.swing.JInternalFra
 
         btnImportarExcel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/megacenter/icones/importacao/icon_import_excel.png"))); // NOI18N
         btnImportarExcel.setText("Importar Excel");
+        btnImportarExcel.setToolTipText("Importar Excel");
         btnImportarExcel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnImportarExcelActionPerformed(evt);

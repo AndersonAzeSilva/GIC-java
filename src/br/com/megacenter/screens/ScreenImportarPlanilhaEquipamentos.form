@@ -489,6 +489,7 @@
               <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_clear.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Limpar"/>
+            <Property name="toolTipText" type="java.lang.String" value="Limpar"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLimparPreviewActionPerformed"/>
@@ -500,6 +501,7 @@
               <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_save_database.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Salvar Importa&#xe7;&#xe3;o"/>
+            <Property name="toolTipText" type="java.lang.String" value="Salvar Importa&#xe7;&#xe3;o"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSalvarImportacaoActionPerformed"/>
@@ -511,6 +513,7 @@
               <Image iconType="3" name="/br/com/megacenter/icones/importacao/icon_import_excel.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Importar Excel"/>
+            <Property name="toolTipText" type="java.lang.String" value="Importar Excel"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnImportarExcelActionPerformed"/>
